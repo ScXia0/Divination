@@ -177,16 +177,6 @@ const hexagrams = [
 const zodiacs = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"];
 const colors = ["朱砂红", "松烟墨", "月白", "竹青", "琥珀金", "靛蓝", "茶棕", "霁青"];
 const directions = ["正东", "东南", "正南", "西南", "正西", "西北", "正北", "东北"];
-const actions = [
-  "把最重要的一件事提前到上午完成",
-  "给正在推进的事情多预留半小时缓冲",
-  "主动联系一个你信任的人",
-  "整理桌面与待办，清掉旧负担",
-  "先说重点，再谈情绪",
-  "留一段独处时间，别让信息过载",
-  "今天更适合精修，而不是盲目扩张",
-  "先答应自己一件小事，并认真完成"
-];
 
 const summaries = [
   { min: 86, title: "上上签", text: "今天的气场很亮，重要安排有望得到回应。" },
@@ -195,36 +185,190 @@ const summaries = [
   { min: 0, title: "静心签", text: "外界噪音偏多，先稳住自己，反而能看到转机。" }
 ];
 
-const textBank = {
+const focusRules = [
+  {
+    category: "career",
+    label: "事业",
+    keywords: ["事业", "工作", "职业", "项目", "合作", "客户", "面试", "升职", "汇报", "团队", "offer"]
+  },
+  {
+    category: "love",
+    label: "感情",
+    keywords: ["感情", "爱情", "恋爱", "桃花", "关系", "对象", "暧昧", "婚姻", "复合"]
+  },
+  {
+    category: "wealth",
+    label: "财运",
+    keywords: ["财", "钱", "收入", "副业", "投资", "消费", "预算", "赚钱", "回款"]
+  },
+  {
+    category: "energy",
+    label: "精力",
+    keywords: ["精力", "状态", "身体", "健康", "睡眠", "休息", "疲惫", "恢复", "压力"]
+  }
+];
+
+const metricDefinitions = {
+  career: {
+    label: "事业",
+    base: 61,
+    birthWeight: 0.8,
+    dayWeight: 1.1,
+    zodiacWeight: 0.8,
+    tarotSalt: 5,
+    hexSalt: 4,
+    narratives: {
+      high: [
+        "推进事项的响应度偏高，今天适合把重要任务往前放。",
+        "执行力和组织力在线，主动协调资源会更见成效。",
+        "事业面向的推进感较强，适合做决定、发起沟通或定节奏。"
+      ],
+      mid: [
+        "工作上更适合先清主线，再处理零碎事务。",
+        "今天的事业运偏稳，按步骤推进比临场猛冲更有效。",
+        "节奏保持清晰时，事业面会逐渐转顺。"
+      ],
+      low: [
+        "事业面今天不宜贪快，先把优先级理顺更重要。",
+        "如果工作卡住，问题多半出在节奏和分工，而不是能力本身。",
+        "这项运势略显保守，先处理阻力点比硬推更有效。"
+      ]
+    }
+  },
+  love: {
+    label: "感情",
+    base: 59,
+    birthWeight: 0.7,
+    dayWeight: 0.9,
+    zodiacWeight: 1.0,
+    tarotSalt: 3,
+    hexSalt: 5,
+    narratives: {
+      high: [
+        "情感交流的回温速度不错，真诚表达会比较有回应。",
+        "感情面更容易出现共鸣感，适合放下试探，直接说重点。",
+        "关系运偏暖，今天更容易被理解，也更容易理解别人。"
+      ],
+      mid: [
+        "感情面整体平稳，少一点预设，多一点倾听会更顺。",
+        "今天的关系节奏偏温和，先稳住情绪比争输赢重要。",
+        "相处上宜轻拿轻放，别把旧波动继续带进今天。"
+      ],
+      low: [
+        "感情面今天较容易敏感，先厘清自己的真实感受再开口。",
+        "关系中的误解需要慢慢拆，不适合用情绪逼结论。",
+        "今天的感情运较谨慎，越想确认，越要注意表达方式。"
+      ]
+    }
+  },
+  wealth: {
+    label: "财运",
+    base: 58,
+    birthWeight: 0.9,
+    dayWeight: 0.8,
+    zodiacWeight: 0.7,
+    tarotSalt: 4,
+    hexSalt: 6,
+    narratives: {
+      high: [
+        "财务判断相对清楚，适合做预算、回款跟进和稳妥决策。",
+        "财运更偏稳健收益，不必冒进，守住节奏就能见效。",
+        "今天的财务敏感度不错，先核对细节，往往能避开损耗。"
+      ],
+      mid: [
+        "财运不算跳跃，更适合稳妥安排而非冲动下注。",
+        "今天宜看清投入产出，控制情绪消费会更划算。",
+        "财务面以整理、校准和保守推进为主。"
+      ],
+      low: [
+        "财运今天偏保守，先守住预算比追逐机会更重要。",
+        "如果涉及支出或投资，今天更适合慢一点、再确认一次。",
+        "金钱面容易受情绪牵动，先分清需要和想要。"
+      ]
+    }
+  },
+  energy: {
+    label: "精力",
+    base: 60,
+    birthWeight: 1.0,
+    dayWeight: 0.8,
+    zodiacWeight: 0.8,
+    tarotSalt: 6,
+    hexSalt: 3,
+    narratives: {
+      high: [
+        "状态恢复力不错，只要顺着节奏走，会越做越顺。",
+        "今天的精力面偏亮，适合先启动，再逐步拉高效率。",
+        "只要不过度分心，精力会支撑你完成关键事项。"
+      ],
+      mid: [
+        "精力整体可用，但需要靠规律节奏来维持。",
+        "状态像缓慢升温，别急着开太多线程。",
+        "今天更适合稳定输出，给自己预留一点缓冲。"
+      ],
+      low: [
+        "精力面略显吃紧，少开分支、少被打断会更好。",
+        "今天的状态需要节省着用，先做最重要的一件事。",
+        "如果觉得散，就先把身体和呼吸找回来，再继续推进。"
+      ]
+    }
+  }
+};
+
+const actionsByFocus = {
+  overall: [
+    "把最重要的一件事提前到上午完成",
+    "给正在推进的事情多预留半小时缓冲",
+    "整理桌面与待办，清掉旧负担",
+    "先答应自己一件小事，并认真完成"
+  ],
   career: [
-    "适合推进谈判、发消息和安排协作，越主动越有回应。",
-    "工作上宜先清主线任务，再处理零碎事务，效率会明显提升。",
-    "今天不宜硬顶流程，多借助已有规则，推进会更顺。",
-    "一个延后的想法值得重新拿出来，它今天更容易落地。"
+    "优先推进一个最关键的工作节点",
+    "把需要沟通的人和下一步动作一次写清楚",
+    "上午完成最难的一项任务，下午只做收口"
   ],
   love: [
-    "表达越真诚，关系越容易升温，别让试探取代沟通。",
-    "今天适合降低预设，带着好奇心去理解对方。",
-    "对旧情绪要轻拿轻放，别把昨天的波动带进今天。",
-    "关系中的温柔边界，会比讨好更有吸引力。"
+    "主动发一条清晰而不过度试探的消息",
+    "今天先说真实感受，不急着要答案",
+    "给关系留一点温度，也留一点边界"
   ],
   wealth: [
-    "财运偏向稳健型，适合整理预算、控制冲动消费。",
-    "今天的小机会来自信息差，先核对细节再决定。",
-    "与其想着一口吃成，不如做好一笔稳妥的小收益。",
-    "花钱在提升效率的工具上，会比情绪消费更值。"
+    "先过一遍今天的支出与预算",
+    "涉及花钱的决定，至少多等十分钟再拍板",
+    "把一笔模糊账目补清楚"
   ],
   energy: [
-    "今天的状态像缓慢升温，热身之后反而越做越顺。",
-    "身体需要更规律的节奏，尤其注意补水与休息。",
-    "下午容易分神，给自己一个短暂放空会更有效。",
-    "少刷一点无意义信息，你的精神会立刻清亮许多。"
+    "先补水、活动五分钟，再开始高强度事项",
+    "把最耗脑的任务缩成一个清晰番茄钟",
+    "今天少刷无用信息，给精神留白"
+  ]
+};
+
+const guidanceByFocus = {
+  overall: [
+    "这次命盘更像是在提醒你：先稳住自己的节奏，再去追求更快的结果。",
+    "今天不需要同时回应所有声音，把注意力收回到最值得推进的一件事上。",
+    "你的运势并不靠猛冲兑现，而是靠稳定和判断力慢慢站稳。"
   ],
-  guidance: [
-    "今天最适合把注意力收回来。你不需要同时回应所有声音，只需要抓住最值得推进的一件事。",
-    "好运更偏向愿意整理内心的人。先稳住节奏，再出手，很多事会比想象中更顺。",
-    "你今天的关键不是做更多，而是做更准。把能量聚焦在真正重要的人和事上。",
-    "如果感到摇摆，先回到身体和呼吸。你稳定下来以后，局势就会开始配合你。"
+  career: [
+    "既然心念落在事业，就别让注意力被零碎杂音带走，先看最关键的推进点。",
+    "事业面今天适合做取舍，不适合什么都想顾到。把主线抓住，结果会更清楚。",
+    "工作上的好运更偏向准备充分的人，先把信息和步骤理清，再出手。"
+  ],
+  love: [
+    "既然你在意感情，这次更重要的不是猜，而是把话说得温和而清楚。",
+    "关系运不靠追问出来，靠信任、节奏和分寸慢慢建立。",
+    "今天的情感提醒是：感受可以诚实，表达要留余地。"
+  ],
+  wealth: [
+    "既然关注财运，今天最值得依赖的不是冲动判断，而是细节核对。",
+    "财务上的稳感来自边界感，先把不必要的损耗切掉，好运才看得见。",
+    "今天更适合做让现金流更清楚的动作，而不是追逐看起来很快的机会。"
+  ],
+  energy: [
+    "既然在看精力面，那今天的关键就是别透支，状态稳住了，事情自然顺。",
+    "身体和精神是同一套系统，今天越规律，你的运势感会越明显。",
+    "别把所有焦虑都当成动力，先让自己恢复到可持续的节奏。"
   ]
 };
 
@@ -250,11 +394,12 @@ function hashString(input) {
 
 function createRng(seed) {
   let t = seed >>> 0;
+
   return function rng() {
     t += 0x6d2b79f5;
-    let v = Math.imul(t ^ (t >>> 15), 1 | t);
-    v ^= v + Math.imul(v ^ (v >>> 7), 61 | v);
-    return ((v ^ (v >>> 14)) >>> 0) / 4294967296;
+    let value = Math.imul(t ^ (t >>> 15), 1 | t);
+    value ^= value + Math.imul(value ^ (value >>> 7), 61 | value);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
   };
 }
 
@@ -262,10 +407,16 @@ function pick(rng, list) {
   return list[Math.floor(rng() * list.length)];
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 function calcZodiacHarmony(zodiac, targetDate) {
   const index = zodiacs.indexOf(zodiac);
-  const dayNumber = new Date(targetDate).getDate();
-  return ((index + 1) * 7 + dayNumber * 3) % 18;
+  const target = new Date(targetDate);
+  const dayNumber = target.getDate();
+  const weekday = target.getDay();
+  return ((index + 1) * 7 + dayNumber * 3 + weekday * 2) % 19;
 }
 
 function scoreLabel(value) {
@@ -290,22 +441,184 @@ function inferZodiac(dateString) {
   return zodiacs[(year - 4 + 1200) % 12];
 }
 
+function centeredValue(rawValue, maxRaw, amplitude) {
+  return Math.round((rawValue / maxRaw) * amplitude * 2 - amplitude);
+}
+
+function formatSigned(value) {
+  return `${value >= 0 ? "+" : ""}${value}`;
+}
+
+function signedInfluence(index, salt, amplitude, orientationShift = 0) {
+  const centered = (((index + 1) * salt) % (amplitude * 2 + 1)) - amplitude;
+  return clamp(centered + orientationShift, -amplitude - 2, amplitude + 2);
+}
+
+function pickBand(score) {
+  if (score >= 80) {
+    return "high";
+  }
+
+  if (score >= 65) {
+    return "mid";
+  }
+
+  return "low";
+}
+
+function resolveFocusInfo(rawFocus) {
+  const trimmed = rawFocus.trim();
+
+  if (!trimmed) {
+    return {
+      category: "overall",
+      label: "整体运势",
+      mode: "blank",
+      raw: ""
+    };
+  }
+
+  const matchedRule = focusRules.find((rule) => rule.keywords.some((keyword) => trimmed.includes(keyword)));
+
+  if (matchedRule) {
+    return {
+      category: matchedRule.category,
+      label: matchedRule.label,
+      mode: "recognized",
+      raw: trimmed
+    };
+  }
+
+  return {
+    category: "overall",
+    label: "整体运势",
+    mode: "custom",
+    raw: trimmed
+  };
+}
+
+function buildDriverSentence(contributions) {
+  const labels = {
+    birth: "生日节律",
+    day: "当日节律",
+    zodiac: "生肖合日",
+    tarot: "塔罗意象",
+    hexagram: "卦象提醒"
+  };
+
+  const entries = Object.entries(contributions).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+  const strongestPositive = entries.find(([, value]) => value > 0);
+  const strongestNegative = entries.find(([, value]) => value < 0);
+
+  if (strongestPositive && strongestNegative && Math.abs(strongestPositive[1]) >= 4 && Math.abs(strongestNegative[1]) >= 4) {
+    return `${labels[strongestPositive[0]]}在托举这项表现，但${labels[strongestNegative[0]]}也在牵制节奏。`;
+  }
+
+  if (strongestPositive && Math.abs(strongestPositive[1]) >= 4) {
+    return `${labels[strongestPositive[0]]}对这项帮助最明显。`;
+  }
+
+  if (strongestNegative && Math.abs(strongestNegative[1]) >= 4) {
+    return `${labels[strongestNegative[0]]}是这项目前更需要留意的牵制点。`;
+  }
+
+  return "这项起伏不算大，更适合用稳定节奏去兑现结果。";
+}
+
+function buildSourceLine(contributions, tarotReversed) {
+  const tarotLabel = tarotReversed ? "塔罗逆位" : "塔罗正位";
+  return [
+    `推演来源：生日节律 ${formatSigned(contributions.birth)}`,
+    `当日节律 ${formatSigned(contributions.day)}`,
+    `生肖合日 ${formatSigned(contributions.zodiac)}`,
+    `${tarotLabel} ${formatSigned(contributions.tarot)}`,
+    `卦象启示 ${formatSigned(contributions.hexagram)}`
+  ].join(" · ");
+}
+
+function buildMetricResult(metricKey, context) {
+  const metric = metricDefinitions[metricKey];
+  const birthShift = clamp(Math.round(context.birthCore * metric.birthWeight), -7, 7);
+  const dayShift = clamp(Math.round(context.dayCore * metric.dayWeight), -8, 8);
+  const zodiacShift = clamp(Math.round(context.zodiacCore * metric.zodiacWeight), -7, 7);
+  const tarotShift = signedInfluence(
+    context.tarotIndex,
+    metric.tarotSalt,
+    5,
+    context.tarotReversed ? -2 : 2
+  );
+  const hexagramShift = signedInfluence(context.hexagramIndex, metric.hexSalt, 4, 0);
+
+  const contributions = {
+    birth: birthShift,
+    day: dayShift,
+    zodiac: zodiacShift,
+    tarot: tarotShift,
+    hexagram: hexagramShift
+  };
+
+  const score = clamp(
+    metric.base + birthShift + dayShift + zodiacShift + tarotShift + hexagramShift,
+    52,
+    95
+  );
+
+  const band = pickBand(score);
+  const narrativeRng = createRng(hashString(`${context.baseSeed}|${metricKey}|${band}`));
+  const detail = pick(narrativeRng, metric.narratives[band]);
+  const driver = buildDriverSentence(contributions);
+
+  return {
+    label: metric.label,
+    score,
+    text: `${detail} ${driver}`,
+    source: buildSourceLine(contributions, context.tarotReversed)
+  };
+}
+
+function buildSummaryText(summary, metrics) {
+  const sorted = Object.entries(metrics).sort((a, b) => b[1].score - a[1].score);
+  const strongest = metricDefinitions[sorted[0][0]].label;
+  const weakest = metricDefinitions[sorted[sorted.length - 1][0]].label;
+  return `${summary.text}${strongest}面向相对更强，${weakest}面向要更稳一些。`;
+}
+
+function buildContextText(focusInfo) {
+  if (focusInfo.mode === "blank") {
+    return "未填写今日心念，这次默认按整体运势解读；基础命盘只由生日、生肖、占卜日期，以及固定抽到的塔罗与卦象共同推演。";
+  }
+
+  if (focusInfo.mode === "recognized") {
+    return `已将你的心念识别为“${focusInfo.label}”，你可以优先查看${focusInfo.label}卡；基础命盘分数不会因为提问文字而重新洗牌。`;
+  }
+
+  return `你的心念“${focusInfo.raw}”没有落在单一领域，因此仍按整体命盘解读；这段输入只作为提醒语境，不会改动基础分数。`;
+}
+
+function renderMetric(metricKey, metricResult) {
+  document.getElementById(`${metricKey}-score`).textContent = scoreLabel(metricResult.score);
+  document.getElementById(`${metricKey}-text`).textContent = metricResult.text;
+  document.getElementById(`${metricKey}-source`).textContent = metricResult.source;
+}
+
 function renderResult(result) {
   emptyState.classList.add("hidden");
   resultView.classList.remove("hidden");
 
   document.getElementById("fortune-title").textContent = result.title;
   document.getElementById("fortune-summary").textContent = result.summary;
+  document.getElementById("fortune-context").textContent = result.context;
   document.getElementById("fortune-score").textContent = result.totalScore;
 
-  document.getElementById("career-score").textContent = scoreLabel(result.careerScore);
-  document.getElementById("career-text").textContent = result.careerText;
-  document.getElementById("love-score").textContent = scoreLabel(result.loveScore);
-  document.getElementById("love-text").textContent = result.loveText;
-  document.getElementById("wealth-score").textContent = scoreLabel(result.wealthScore);
-  document.getElementById("wealth-text").textContent = result.wealthText;
-  document.getElementById("energy-score").textContent = scoreLabel(result.energyScore);
-  document.getElementById("energy-text").textContent = result.energyText;
+  renderMetric("career", result.metrics.career);
+  renderMetric("love", result.metrics.love);
+  renderMetric("wealth", result.metrics.wealth);
+  renderMetric("energy", result.metrics.energy);
+
+  document.querySelectorAll(".metric-card").forEach((card) => {
+    const matchesFocus = result.focusCategory !== "overall" && card.dataset.metric === result.focusCategory;
+    card.classList.toggle("active-focus", matchesFocus);
+  });
 
   document.getElementById("tarot-name").textContent = result.tarot.name;
   document.getElementById("tarot-orientation").textContent = result.tarot.orientation;
@@ -327,51 +640,79 @@ function generateDivination(formData) {
   const birthdate = formData.get("birthdate");
   const zodiac = formData.get("zodiac");
   const targetDate = formData.get("target-date");
-  const focus = formData.get("focus")?.trim() || "今日整体运势";
+  const rawFocus = formData.get("focus")?.trim() || "";
+  const focusInfo = resolveFocusInfo(rawFocus);
 
-  const seed = hashString(`${nickname}|${birthdate}|${zodiac}|${targetDate}|${focus}`);
-  const rng = createRng(seed);
+  const baseSeed = hashString(`${birthdate}|${zodiac}|${targetDate}`);
+  const oracleSeed = hashString(`${birthdate}|${zodiac}|${targetDate}|oracle`);
+  const guidanceSeed = hashString(`${birthdate}|${zodiac}|${targetDate}|${focusInfo.category}|${focusInfo.raw || "overall"}`);
+
+  const oracleRng = createRng(oracleSeed);
+  const fortuneRng = createRng(baseSeed);
+  const guidanceRng = createRng(guidanceSeed);
 
   const birthDay = new Date(birthdate);
-  const birthInfluence = ((birthDay.getFullYear() % 100) + birthDay.getMonth() + 1 + birthDay.getDate()) % 11;
-  const harmony = calcZodiacHarmony(zodiac, targetDate);
+  const targetDay = new Date(targetDate);
+  const birthRhythm = ((birthDay.getFullYear() % 100) + (birthDay.getMonth() + 1) * 2 + birthDay.getDate()) % 19;
+  const dayRhythm = (((targetDay.getMonth() + 1) * 3) + targetDay.getDate() + targetDay.getDay() * 4) % 19;
+  const zodiacHarmony = calcZodiacHarmony(zodiac, targetDate);
 
-  const totalScore = 48 + Math.floor(rng() * 40) + birthInfluence + Math.floor(harmony / 3);
-  const boundedTotal = Math.min(99, totalScore);
+  const tarotIndex = Math.floor(oracleRng() * tarotDeck.length);
+  const tarot = tarotDeck[tarotIndex];
+  const tarotReversed = oracleRng() > 0.54;
+  const hexagramIndex = Math.floor(oracleRng() * hexagrams.length);
+  const hexagram = hexagrams[hexagramIndex];
 
-  const careerScore = Math.min(99, 45 + Math.floor(rng() * 33) + birthInfluence + Math.floor(harmony / 4));
-  const loveScore = Math.min(99, 42 + Math.floor(rng() * 36) + Math.floor(harmony / 2));
-  const wealthScore = Math.min(99, 40 + Math.floor(rng() * 35) + birthInfluence);
-  const energyScore = Math.min(99, 44 + Math.floor(rng() * 34) + Math.floor(harmony / 3));
+  const context = {
+    baseSeed,
+    birthCore: centeredValue(birthRhythm, 18, 6),
+    dayCore: centeredValue(dayRhythm, 18, 7),
+    zodiacCore: centeredValue(zodiacHarmony, 18, 6),
+    tarotIndex,
+    tarotReversed,
+    hexagramIndex
+  };
 
-  const tarot = pick(rng, tarotDeck);
-  const tarotReversed = rng() > 0.54;
-  const hexagram = pick(rng, hexagrams);
-  const summary = resolveSummary(boundedTotal);
+  const metrics = {
+    career: buildMetricResult("career", context),
+    love: buildMetricResult("love", context),
+    wealth: buildMetricResult("wealth", context),
+    energy: buildMetricResult("energy", context)
+  };
+
+  const totalScore = clamp(
+    Math.round(
+      metrics.career.score * 0.3 +
+        metrics.love.score * 0.23 +
+        metrics.wealth.score * 0.22 +
+        metrics.energy.score * 0.25
+    ),
+    52,
+    95
+  );
+
+  const summary = resolveSummary(totalScore);
+  const actionPool = actionsByFocus[focusInfo.category] || actionsByFocus.overall;
+  const guidancePool = guidanceByFocus[focusInfo.category] || guidanceByFocus.overall;
 
   return {
     title: `${summary.title} · ${nickname}的${targetDate}命盘`,
-    summary: `${summary.text} 今日心念主题是“${focus}”。`,
-    totalScore: boundedTotal,
-    careerScore,
-    loveScore,
-    wealthScore,
-    energyScore,
-    careerText: pick(rng, textBank.career),
-    loveText: pick(rng, textBank.love),
-    wealthText: pick(rng, textBank.wealth),
-    energyText: pick(rng, textBank.energy),
+    summary: buildSummaryText(summary, metrics),
+    context: buildContextText(focusInfo),
+    totalScore,
+    focusCategory: focusInfo.category,
+    metrics,
     tarot: {
       name: tarot.name,
       orientation: tarotReversed ? "逆位" : "正位",
       message: tarotReversed ? tarot.reversed : tarot.upright
     },
     hexagram,
-    luckyColor: pick(rng, colors),
-    luckyNumber: String(1 + Math.floor(rng() * 9)),
-    luckyDirection: pick(rng, directions),
-    dailyAction: pick(rng, actions),
-    guidance: pick(rng, textBank.guidance)
+    luckyColor: pick(fortuneRng, colors),
+    luckyNumber: String(1 + Math.floor(fortuneRng() * 9)),
+    luckyDirection: pick(fortuneRng, directions),
+    dailyAction: pick(guidanceRng, actionPool),
+    guidance: pick(guidanceRng, guidancePool)
   };
 }
 

@@ -333,12 +333,37 @@ body::before {
   font-size: 1.48rem;
 }
 
+.fortune-context {
+  margin: 12px 0 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.8;
+}
+
 .metric-card p,
 .oracle-card p,
 .message-block p,
 .ritual-card strong,
 .disclaimer {
   line-height: 1.72;
+}
+
+.metric-card p {
+  margin: 0;
+}
+
+.metric-card.active-focus {
+  border-color: rgba(191, 123, 48, 0.35);
+  box-shadow: 0 14px 30px rgba(191, 123, 48, 0.12);
+}
+
+.metric-source {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(71, 42, 31, 0.08);
+  color: var(--muted);
+  font-size: 0.84rem;
 }
 
 .oracle-grid {
