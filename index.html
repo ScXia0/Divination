@@ -89,13 +89,13 @@
             </label>
 
             <label>
-              <span>今日心念</span>
+              <span>今日心念 / 想问的问题</span>
               <textarea
                 id="focus"
                 name="focus"
                 rows="4"
-                maxlength="80"
-                placeholder="比如：今天适合推进合作吗？"
+                maxlength="120"
+                placeholder="比如：我今天适合表白吗？"
               ></textarea>
             </label>
 
@@ -126,31 +126,65 @@
               </div>
             </div>
 
-            <div class="metric-grid">
-              <article class="metric-card" data-metric="career">
-                <span>事业</span>
-                <strong id="career-score"></strong>
-                <p id="career-text"></p>
-                <p id="career-source" class="metric-source"></p>
+            <div id="general-view" class="result-mode hidden">
+              <div class="metric-grid">
+                <article class="metric-card" data-metric="career">
+                  <span>事业</span>
+                  <strong id="career-score"></strong>
+                  <p id="career-text"></p>
+                  <p id="career-source" class="metric-source"></p>
+                </article>
+                <article class="metric-card" data-metric="love">
+                  <span>感情</span>
+                  <strong id="love-score"></strong>
+                  <p id="love-text"></p>
+                  <p id="love-source" class="metric-source"></p>
+                </article>
+                <article class="metric-card" data-metric="wealth">
+                  <span>财运</span>
+                  <strong id="wealth-score"></strong>
+                  <p id="wealth-text"></p>
+                  <p id="wealth-source" class="metric-source"></p>
+                </article>
+                <article class="metric-card" data-metric="energy">
+                  <span>精力</span>
+                  <strong id="energy-score"></strong>
+                  <p id="energy-text"></p>
+                  <p id="energy-source" class="metric-source"></p>
+                </article>
+              </div>
+            </div>
+
+            <div id="question-view" class="question-view hidden">
+              <article class="question-card">
+                <p class="oracle-label">问题解读</p>
+                <h3 id="question-title"></h3>
+                <p id="question-verdict" class="question-verdict"></p>
+                <p id="question-reason" class="question-reason"></p>
               </article>
-              <article class="metric-card" data-metric="love">
-                <span>感情</span>
-                <strong id="love-score"></strong>
-                <p id="love-text"></p>
-                <p id="love-source" class="metric-source"></p>
-              </article>
-              <article class="metric-card" data-metric="wealth">
-                <span>财运</span>
-                <strong id="wealth-score"></strong>
-                <p id="wealth-text"></p>
-                <p id="wealth-source" class="metric-source"></p>
-              </article>
-              <article class="metric-card" data-metric="energy">
-                <span>精力</span>
-                <strong id="energy-score"></strong>
-                <p id="energy-text"></p>
-                <p id="energy-source" class="metric-source"></p>
-              </article>
+
+              <div class="question-support-grid">
+                <article class="ritual-card">
+                  <span>关联运势</span>
+                  <strong id="question-relevant-score"></strong>
+                  <p id="question-relevant-text" class="support-text"></p>
+                </article>
+                <article class="ritual-card">
+                  <span>判断依据</span>
+                  <strong id="question-basis-title"></strong>
+                  <p id="question-basis-text" class="support-text"></p>
+                </article>
+                <article class="ritual-card">
+                  <span>怎么准备</span>
+                  <strong id="question-prep-title"></strong>
+                  <p id="question-prep-text" class="support-text"></p>
+                </article>
+                <article class="ritual-card">
+                  <span>给你的鼓励</span>
+                  <strong id="question-encourage-title"></strong>
+                  <p id="question-encourage-text" class="support-text"></p>
+                </article>
+              </div>
             </div>
 
             <div class="oracle-grid">

@@ -432,3 +432,67 @@ body::before {
     flex-direction: column;
   }
 }
+
+
+.result-mode,
+.question-view {
+  display: grid;
+  gap: 18px;
+}
+
+.question-card {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(191, 123, 48, 0.18);
+  background: linear-gradient(135deg, rgba(255, 247, 239, 0.96), rgba(247, 232, 210, 0.88));
+}
+
+.question-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.7rem;
+}
+
+.question-verdict {
+  margin: 0 0 10px;
+  color: var(--red);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.question-reason,
+.support-text {
+  margin: 0;
+  line-height: 1.8;
+}
+
+.question-support-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fortune-context {
+  margin: 12px 0 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.8;
+}
+
+.metric-card p {
+  margin: 0;
+}
+
+.metric-source {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(71, 42, 31, 0.08);
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+@media (max-width: 640px) {
+  .question-support-grid {
+    grid-template-columns: 1fr;
+  }
+}
