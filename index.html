@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>今日灵签 | 当天运势占卜</title>
+    <meta
+      name="description"
+      content="输入生日、生肖与当天日期，获得塔罗、八卦与生肖融合的当天运势占卜结果。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Daily Divination</p>
+          <h1>今日灵签</h1>
+          <p class="hero-text">
+            将塔罗意象、周易卦象与生肖日运组合成一张属于你的今日命盘。适合做晨间仪式感，也适合分享给朋友一起玩。
+          </p>
+          <div class="hero-tags">
+            <span>塔罗抽牌</span>
+            <span>八卦启示</span>
+            <span>生肖日运</span>
+          </div>
+        </div>
+        <div class="hero-orb">
+          <div class="orb-glow"></div>
+          <div class="orb-core">
+            <span>灵感</span>
+            <strong>今日能量</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel form-panel">
+          <div class="panel-head">
+            <p class="section-kicker">输入命盘</p>
+            <h2>填写你的今日占卜信息</h2>
+          </div>
+
+          <form id="divination-form" class="fortune-form">
+            <label>
+              <span>你的称呼</span>
+              <input
+                type="text"
+                id="nickname"
+                name="nickname"
+                maxlength="24"
+                placeholder="比如：小夏"
+              />
+            </label>
+
+            <label>
+              <span>生日</span>
+              <input type="date" id="birthdate" name="birthdate" required />
+            </label>
+
+            <label>
+              <span>生肖</span>
+              <select id="zodiac" name="zodiac" required>
+                <option value="">请选择生肖</option>
+                <option value="鼠">鼠</option>
+                <option value="牛">牛</option>
+                <option value="虎">虎</option>
+                <option value="兔">兔</option>
+                <option value="龙">龙</option>
+                <option value="蛇">蛇</option>
+                <option value="马">马</option>
+                <option value="羊">羊</option>
+                <option value="猴">猴</option>
+                <option value="鸡">鸡</option>
+                <option value="狗">狗</option>
+                <option value="猪">猪</option>
+              </select>
+            </label>
+
+            <label>
+              <span>占卜日期</span>
+              <input type="date" id="target-date" name="target-date" required />
+            </label>
+
+            <label>
+              <span>今日心念</span>
+              <textarea
+                id="focus"
+                name="focus"
+                rows="4"
+                maxlength="80"
+                placeholder="比如：今天适合推进合作吗？"
+              ></textarea>
+            </label>
+
+            <button class="primary-btn" type="submit">开启今日占卜</button>
+          </form>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-head">
+            <p class="section-kicker">命盘结果</p>
+            <h2>你的当天运势会显示在这里</h2>
+          </div>
+
+          <div id="empty-state" class="empty-state">
+            <p>输入信息后点击“开启今日占卜”，我会为你生成一份今日专属运势。</p>
+          </div>
+
+          <div id="result-view" class="result-view hidden">
+            <div class="headline-card">
+              <div>
+                <p id="fortune-title" class="fortune-title"></p>
+                <h3 id="fortune-summary"></h3>
+              </div>
+              <div class="score-wrap">
+                <span>今日总运</span>
+                <strong id="fortune-score">88</strong>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span>事业</span>
+                <strong id="career-score"></strong>
+                <p id="career-text"></p>
+              </article>
+              <article class="metric-card">
+                <span>感情</span>
+                <strong id="love-score"></strong>
+                <p id="love-text"></p>
+              </article>
+              <article class="metric-card">
+                <span>财运</span>
+                <strong id="wealth-score"></strong>
+                <p id="wealth-text"></p>
+              </article>
+              <article class="metric-card">
+                <span>精力</span>
+                <strong id="energy-score"></strong>
+                <p id="energy-text"></p>
+              </article>
+            </div>
+
+            <div class="oracle-grid">
+              <article class="oracle-card tarot">
+                <p class="oracle-label">塔罗启示</p>
+                <h3 id="tarot-name"></h3>
+                <p id="tarot-orientation" class="badge"></p>
+                <p id="tarot-message"></p>
+              </article>
+              <article class="oracle-card hexagram">
+                <p class="oracle-label">卦象启示</p>
+                <h3 id="hexagram-name"></h3>
+                <p id="hexagram-symbol" class="badge"></p>
+                <p id="hexagram-message"></p>
+              </article>
+            </div>
+
+            <div class="ritual-grid">
+              <article class="ritual-card">
+                <span>幸运颜色</span>
+                <strong id="lucky-color"></strong>
+              </article>
+              <article class="ritual-card">
+                <span>幸运数字</span>
+                <strong id="lucky-number"></strong>
+              </article>
+              <article class="ritual-card">
+                <span>有利方位</span>
+                <strong id="lucky-direction"></strong>
+              </article>
+              <article class="ritual-card">
+                <span>行动建议</span>
+                <strong id="daily-action"></strong>
+              </article>
+            </div>
+
+            <div class="message-block">
+              <h3>今日提醒</h3>
+              <p id="daily-guidance"></p>
+            </div>
+
+            <p class="disclaimer">
+              本页面为仪式感与娱乐体验设计，结果来自固定规则生成，不替代现实决策。
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
