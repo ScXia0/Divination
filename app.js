@@ -306,7 +306,7 @@ const questionRules = [
   {
     type: "careerAction",
     category: "career",
-    keywords: ["事业", "工作", "项目", "合作", "推进", "面试", "跳槽", "离职", "汇报", "客户", "offer"]
+    keywords: ["事业", "工作", "项目", "合作", "推进", "面试", "跳槽", "离职", "汇报", "客户", "offer", "老板", "上司", "领导", "晋升", "升职", "提薪", "加薪", "申请", "同意", "加班", "提案", "述职"]
   },
   {
     type: "moneyAction",
@@ -379,6 +379,35 @@ const guidancePools = {
   ]
 };
 
+
+const suggestedQuestions = {
+  career: [
+    "我今天适合主动跟老板谈晋升吗？",
+    "我今天需要加班把这件事推进完吗？",
+    "我今天适合主动提方案争取机会吗？"
+  ],
+  love: [
+    "我今天适合表白吗？",
+    "我今天适合主动约对方见面吗？",
+    "我今天适合把心里话说清楚吗？"
+  ],
+  wealth: [
+    "我今天适合买下这个东西吗？",
+    "我今天适合谈钱或催回款吗？",
+    "我今天适合做这笔支出决定吗？"
+  ],
+  energy: [
+    "我今天需要早点休息，还是可以继续冲一下？",
+    "我今天适合运动还是更适合放空恢复？",
+    "我今天适合安排高强度任务吗？"
+  ],
+  overall: [
+    "我今天最适合优先推进哪件事？",
+    "我今天适合主动出击，还是先稳一稳？",
+    "我今天最该留意哪方面的节奏？"
+  ]
+};
+
 const form = document.getElementById("divination-form");
 const resultView = document.getElementById("result-view");
 const emptyState = document.getElementById("empty-state");
@@ -386,6 +415,10 @@ const generalView = document.getElementById("general-view");
 const questionView = document.getElementById("question-view");
 const birthdateInput = document.getElementById("birthdate");
 const zodiacInput = document.getElementById("zodiac");
+const targetDateInput = document.getElementById("target-date");
+const focusInput = document.getElementById("focus");
+const focusExampleText = document.getElementById("focus-example-text");
+const focusExampleAction = document.getElementById("focus-example-action");
 
 function hashString(input) {
   let h1 = 1779033703;
@@ -586,6 +619,47 @@ function buildGeneralSummary(summary, metrics) {
 
 function buildGeneralContext() {
   return "未填写具体问题时，这次会按整体命盘解读；基础分数只由生日、生肖、占卜日期与固定抽到的塔罗、卦象共同决定。";
+}
+
+function resolveDominantCategory(metrics) {
+  const sorted = Object.entries(metrics).sort((a, b) => b[1].score - a[1].score);
+  return sorted[0]?.[0] || "overall";
+}
+
+function buildMetricsPreview() {
+  const birthdate = birthdateInput.value;
+  const zodiac = zodiacInput.value;
+  const targetDate = targetDateInput.value;
+
+  if (!birthdate || !zodiac || !targetDate) {
+    return null;
+  }
+
+  const context = calcBaseContext(birthdate, zodiac, targetDate);
+  return {
+    context,
+    metrics: {
+      career: buildMetricResult("career", context),
+      love: buildMetricResult("love", context),
+      wealth: buildMetricResult("wealth", context),
+      energy: buildMetricResult("energy", context)
+    }
+  };
+}
+
+function updateFocusExample(preview = buildMetricsPreview()) {
+  let category = "overall";
+  let seed = hashString("default-example");
+
+  if (preview) {
+    category = resolveDominantCategory(preview.metrics);
+    seed = preview.context.baseSeed;
+  }
+
+  const pool = suggestedQuestions[category] || suggestedQuestions.overall;
+  const question = pick(createRng(hashString(`${seed}|${category}|example`)), pool);
+  focusExampleText.textContent = `不知道怎么写？比如：${question}`;
+  focusExampleAction.dataset.example = question;
 }
 
 function bandText(score) {
@@ -887,13 +961,26 @@ form.addEventListener("submit", (event) => {
   const formData = new FormData(form);
   const result = generateDivination(formData);
   renderResult(result);
+  updateFocusExample({ context: { baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("zodiac")}|${formData.get("target-date")}`) }, metrics: result.metrics });
 });
 
 setToday();
+updateFocusExample();
 
 birthdateInput.addEventListener("change", () => {
   const inferred = inferZodiac(birthdateInput.value);
   if (inferred) {
     zodiacInput.value = inferred;
+  }
+  updateFocusExample();
+});
+
+zodiacInput.addEventListener("change", updateFocusExample);
+targetDateInput.addEventListener("change", updateFocusExample);
+focusExampleAction.addEventListener("click", () => {
+  const example = focusExampleAction.dataset.example;
+  if (example) {
+    focusInput.value = example;
+    focusInput.focus();
   }
 });

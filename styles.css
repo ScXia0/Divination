@@ -213,6 +213,40 @@ body::before {
   box-shadow: 0 10px 24px rgba(191, 123, 48, 0.12);
 }
 
+.focus-example {
+  margin-top: -4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 249, 240, 0.72);
+  border: 1px dashed rgba(191, 123, 48, 0.28);
+}
+
+.focus-example-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.focus-example p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
+.focus-example-action {
+  margin-top: 10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .primary-btn {
   margin-top: 6px;
   padding: 16px 18px;
