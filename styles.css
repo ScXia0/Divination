@@ -493,6 +493,29 @@ body::before {
   font-weight: 700;
 }
 
+.question-ai-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.question-ai-note.pending {
+  background: rgba(191, 123, 48, 0.12);
+  color: var(--gold);
+}
+
+.question-ai-note.ready {
+  background: rgba(64, 102, 87, 0.12);
+  color: var(--green);
+}
+
+.question-ai-note.fallback {
+  background: rgba(185, 81, 66, 0.1);
+  color: var(--red);
+}
+
 .question-reason,
 .support-text {
   margin: 0;

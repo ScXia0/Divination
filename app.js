@@ -419,6 +419,8 @@ const targetDateInput = document.getElementById("target-date");
 const focusInput = document.getElementById("focus");
 const focusExampleText = document.getElementById("focus-example-text");
 const focusExampleAction = document.getElementById("focus-example-action");
+const questionAiNote = document.getElementById("question-ai-note");
+let latestQuestionRequestId = 0;
 
 function hashString(input) {
   let h1 = 1779033703;
@@ -825,8 +827,88 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
     context: `这次把你的输入识别成一个具体问题，并优先参考${relevantLabel}位回答；换问题不会改动基础命盘，只会改变解读角度。`,
     summary: verdict,
     title: `${resolveSummary(totalScore).title} · 问题占断`,
-    action: pick(createRng(hashString(`${rawFocus}|action|${decisionLevel}`)), actionPools[focusInfo.category] || generalActions)
+    action: pick(createRng(hashString(`${rawFocus}|action|${decisionLevel}`)), actionPools[focusInfo.category] || generalActions),
+    aiState: "pending",
+    aiNote: "AI 正在结合这张固定命盘细化回答，基础分数、塔罗与卦象不会被改动。"
   };
+}
+
+function buildAiPayload(formData, result) {
+  return {
+    nickname: formData.get("nickname")?.trim() || "你",
+    birthdate: formData.get("birthdate"),
+    zodiac: formData.get("zodiac"),
+    targetDate: formData.get("target-date"),
+    question: formData.get("focus")?.trim() || "",
+    totalScore: result.totalScore,
+    title: result.title,
+    summary: result.summary,
+    context: result.context,
+    dailyAction: result.dailyAction,
+    guidance: result.guidance,
+    luckyColor: result.luckyColor,
+    luckyNumber: result.luckyNumber,
+    luckyDirection: result.luckyDirection,
+    tarot: result.tarot,
+    hexagram: result.hexagram,
+    metrics: result.metrics,
+    localQuestion: result.question
+  };
+}
+
+function mergeAiQuestionResult(result, answer, model) {
+  return {
+    ...result,
+    summary: answer.summary || result.summary,
+    context: answer.context || `基础命盘分数未改动，当前内容由 ${model} 结合固定命盘做了进一步解读。`,
+    dailyAction: answer.action || result.dailyAction,
+    guidance: answer.guidance || result.guidance,
+    question: {
+      ...result.question,
+      questionTitle: answer.questionTitle || result.question.questionTitle,
+      verdict: answer.verdict || result.question.verdict,
+      reason: answer.reason || result.question.reason,
+      relevantTitle: answer.relevantTitle || result.question.relevantTitle,
+      relevantText: answer.relevantText || result.question.relevantText,
+      basisTitle: answer.basisTitle || result.question.basisTitle,
+      basisText: answer.basisText || result.question.basisText,
+      prepTitle: answer.prepTitle || result.question.prepTitle,
+      prepText: answer.prepText || result.question.prepText,
+      encourageTitle: answer.encourageTitle || result.question.encourageTitle,
+      encourageText: answer.encourageText || result.question.encourageText,
+      aiState: "ready",
+      aiNote: `已由 ${model} 深度解读，基础分数与占卜依据保持不变。`
+    }
+  };
+}
+
+function markQuestionFallback(result, message) {
+  return {
+    ...result,
+    question: {
+      ...result.question,
+      aiState: "fallback",
+      aiNote: message
+    }
+  };
+}
+
+async function requestAiQuestionInterpretation(formData, result) {
+  const response = await fetch("/api/interpret", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(buildAiPayload(formData, result))
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok || !payload.ok || !payload.answer) {
+    throw new Error(payload.message || "AI 深度解读暂时没有成功，当前显示的是本地规则结果。");
+  }
+
+  return mergeAiQuestionResult(result, payload.answer, payload.model || "gpt-5.4");
 }
 
 function renderMetric(metricKey, metricResult) {
@@ -838,6 +920,14 @@ function renderMetric(metricKey, metricResult) {
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
+  questionAiNote.textContent = question.aiNote || "";
+  questionAiNote.className = "question-ai-note";
+  if (question.aiState) {
+    questionAiNote.classList.add(question.aiState);
+    questionAiNote.classList.remove("hidden");
+  } else {
+    questionAiNote.classList.add("hidden");
+  }
   document.getElementById("question-reason").textContent = question.reason;
   document.getElementById("question-relevant-score").textContent = question.relevantTitle;
   document.getElementById("question-relevant-text").textContent = question.relevantText;
@@ -948,7 +1038,7 @@ function generateDivination(formData) {
     mode: "question",
     title: question.title,
     summary: question.summary,
-    context: question.context,
+    context: `${question.context} AI 会在不改动基础命盘的前提下继续细化这条回答。`,
     question,
     dailyAction: question.action,
     guidance: question.guidance
@@ -962,12 +1052,34 @@ function setToday() {
   document.getElementById("target-date").value = localDate;
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(form);
   const result = generateDivination(formData);
   renderResult(result);
   updateFocusExample({ context: { baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("zodiac")}|${formData.get("target-date")}`) }, metrics: result.metrics });
+
+  if (result.mode !== "question") {
+    return;
+  }
+
+  const requestId = ++latestQuestionRequestId;
+
+  try {
+    const enhancedResult = await requestAiQuestionInterpretation(formData, result);
+    if (requestId !== latestQuestionRequestId) {
+      return;
+    }
+    renderResult(enhancedResult);
+  } catch (error) {
+    if (requestId !== latestQuestionRequestId) {
+      return;
+    }
+    const message = error instanceof Error
+      ? error.message
+      : "AI 深度解读暂时没有成功，当前显示的是本地规则结果。";
+    renderResult(markQuestionFallback(result, message));
+  }
 });
 
 setToday();
