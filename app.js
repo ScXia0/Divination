@@ -796,6 +796,10 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   const questionTitle = `关于“${rawFocus}”`;
   const verdict = buildVerdict(focusInfo, decisionLevel);
   const reason = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。塔罗「${tarot.name}」${tarot.orientation}提示“${tarot.message}”，卦象「${hexagram.name}」则提醒“${hexagram.text}”。综合来看，这件事更适合按照今天的节奏来处理。`;
+  const relevantTitle = relevantMetric ? `主参考：${relevantLabel}位` : "主参考：整体命盘";
+  const relevantText = relevantMetric
+    ? `这次判断优先参考${relevantLabel}位，但也会同时结合今日总运 ${totalScore} 分、塔罗与卦象，不再重复展开四个固定模块。`
+    : `这次问题没有明确落在单一领域，因此主要参考今日总运 ${totalScore} 分与两张占卜依据来回答。`;
   const basisTitle = `${relevantLabel} ${relevantScore} 分`;
   const basisText = relevantMetric
     ? `${relevantMetric.text} ${relevantMetric.source}`
@@ -806,6 +810,8 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   return {
     relevantLabel,
     relevantScore,
+    relevantTitle,
+    relevantText,
     questionTitle,
     verdict,
     reason,
@@ -833,8 +839,8 @@ function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
   document.getElementById("question-reason").textContent = question.reason;
-  document.getElementById("question-relevant-score").textContent = `${question.relevantLabel} ${question.relevantScore} 分`;
-  document.getElementById("question-relevant-text").textContent = `这次判断以今日总运和 ${question.relevantLabel} 位为主，不再展开四个固定模块。`;
+  document.getElementById("question-relevant-score").textContent = question.relevantTitle;
+  document.getElementById("question-relevant-text").textContent = question.relevantText;
   document.getElementById("question-basis-title").textContent = question.basisTitle;
   document.getElementById("question-basis-text").textContent = question.basisText;
   document.getElementById("question-prep-title").textContent = question.prepTitle;
