@@ -571,17 +571,23 @@ textarea {
 
 .focus-example {
   display: grid;
-  gap: 12px;
-  padding: 18px;
-  border-radius: 22px;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 18px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(143, 83, 102, 0.11), rgba(13, 21, 39, 0.76));
 }
 
+.focus-example p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
 .focus-example-action {
   justify-self: start;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 1px solid rgba(212, 176, 118, 0.28);
   border-radius: 999px;
   background: rgba(212, 176, 118, 0.08);
@@ -598,9 +604,9 @@ textarea {
 
 .ask-module {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   margin-top: 18px;
-  padding: 20px;
+  padding: 18px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(14, 23, 40, 0.92), rgba(9, 15, 28, 0.88));

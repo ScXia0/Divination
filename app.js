@@ -1424,12 +1424,13 @@ function mergeAiQuestionResult(result, answer, model) {
 }
 
 function markQuestionFallback(result, message) {
+  const shouldHideNote = message.includes("OPENAI_API_KEY");
   return {
     ...result,
     question: {
       ...result.question,
       aiState: "fallback",
-      aiNote: message
+      aiNote: shouldHideNote ? "" : message
     }
   };
 }
@@ -1715,7 +1716,6 @@ askSubmitButton.addEventListener("click", async () => {
   questionFormData.set("focus", rawQuestion);
   const result = generateDivination(questionFormData);
   latestQuestionResult = result;
-  setAskModuleVisible(false);
   setAskSubmitLoading(true);
   renderDashboard();
   updateExampleFromFormData(questionFormData, result);
