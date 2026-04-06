@@ -1326,8 +1326,18 @@ function setToday() {
   setDateGroupValue(targetDateDatePartsGroup, localDate);
 }
 
+function resetQuestionDraft() {
+  latestQuestionRequestId += 1;
+  if (focusInput.value.trim()) {
+    focusInput.value = "";
+  }
+  updateFocusExample();
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  refreshBirthdateDerivedState();
+  syncDateGroupValue(targetDateDatePartsGroup);
   if (!validateDateGroup(birthdateDatePartsGroup) || !validateDateGroup(targetDateDatePartsGroup)) {
     return;
   }
@@ -1372,11 +1382,15 @@ syncDateGroupValue(targetDateDatePartsGroup);
 refreshBirthdateDerivedState();
 updateFocusExample();
 
+nicknameInput.addEventListener("input", resetQuestionDraft);
+
 [birthdateYearInput, birthdateMonthInput, birthdateDayInput].forEach((input) => {
+  input.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", refreshBirthdateDerivedState);
 });
 
 [targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
+  input.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", updateFocusExample);
 });
 focusExampleAction.addEventListener("click", () => {
