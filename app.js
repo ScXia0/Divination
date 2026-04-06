@@ -431,6 +431,7 @@ const birthdateHint = document.getElementById("birthdate-hint");
 const birthtimeGroup = document.getElementById("birthtime-group");
 const birthtimeHourInput = document.getElementById("birthtime-hour");
 const birthtimeMinuteInput = document.getElementById("birthtime-minute");
+const birthtimeSecondInput = document.getElementById("birthtime-second");
 const birthtimeHint = document.getElementById("birthtime-hint");
 const targetDateGroup = document.getElementById("target-date-group");
 const targetDateYearInput = document.getElementById("target-date-year");
@@ -440,6 +441,7 @@ const targetDateHint = document.getElementById("target-date-hint");
 const targetTimeGroup = document.getElementById("target-time-group");
 const targetTimeHourInput = document.getElementById("target-time-hour");
 const targetTimeMinuteInput = document.getElementById("target-time-minute");
+const targetTimeSecondInput = document.getElementById("target-time-second");
 const targetTimeHint = document.getElementById("target-time-hint");
 const birthdateDatePartsGroup = {
   group: birthdateGroup,
@@ -455,8 +457,9 @@ const birthtimePartsGroup = {
   hiddenInput: birthtimeInput,
   hourInput: birthtimeHourInput,
   minuteInput: birthtimeMinuteInput,
+  secondInput: birthtimeSecondInput,
   hint: birthtimeHint,
-  emptyHint: "若记不清可保留 00:00 的参考显示；只有你主动填写后，才会计入命盘。",
+  emptyHint: "若记不清可保留 00:00:00 的参考显示；只有你主动填写后，才会计入命盘。",
   activeHint: "出生时刻已纳入这次命盘计算。"
 };
 const targetDateDatePartsGroup = {
@@ -473,8 +476,9 @@ const targetTimePartsGroup = {
   hiddenInput: targetTimeInput,
   hourInput: targetTimeHourInput,
   minuteInput: targetTimeMinuteInput,
+  secondInput: targetTimeSecondInput,
   hint: targetTimeHint,
-  emptyHint: "占卜时刻会默认显示当前时间，并在你停留页面期间持续刷新。"
+  emptyHint: "占卜时刻会默认显示当前时间，并在你停留页面期间按秒持续刷新。"
 };
 let latestQuestionRequestId = 0;
 let targetDateIsManual = false;
@@ -562,21 +566,22 @@ function getDaysInMonth(year, month) {
 }
 
 function parseTimeParts(timeString) {
-  const match = /^(\d{2}):(\d{2})$/.exec(timeString.trim());
+  const match = /^(\d{2}):(\d{2}):(\d{2})$/.exec(timeString.trim());
 
   if (!match) {
     return null;
   }
 
-  const [, hourText, minuteText] = match;
+  const [, hourText, minuteText, secondText] = match;
   const hour = Number(hourText);
   const minute = Number(minuteText);
+  const second = Number(secondText);
 
-  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
     return null;
   }
 
-  return { hour, minute };
+  return { hour, minute, second };
 }
 
 function requireValidTime(timeString) {
@@ -593,7 +598,7 @@ function getCurrentMomentStrings() {
   const now = new Date();
   return {
     date: `${now.getFullYear()}/${pad2(now.getMonth() + 1)}/${pad2(now.getDate())}`,
-    time: `${pad2(now.getHours())}:${pad2(now.getMinutes())}`
+    time: `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`
   };
 }
 
@@ -761,11 +766,18 @@ function clampTimeGroupValues(group) {
   if (group.minuteInput.value.length === 2) {
     group.minuteInput.value = pad2(clamp(Number(group.minuteInput.value), 0, 59));
   }
+
+  if (group.secondInput && group.secondInput.value.length === 2) {
+    group.secondInput.value = pad2(clamp(Number(group.secondInput.value), 0, 59));
+  }
 }
 
-function setTimeGroupDisplay(group, hour, minute) {
+function setTimeGroupDisplay(group, hour, minute, second = "00") {
   group.hourInput.value = hour;
   group.minuteInput.value = minute;
+  if (group.secondInput) {
+    group.secondInput.value = second;
+  }
 }
 
 function clearTimeGroupError(group, message = group.emptyHint) {
@@ -784,30 +796,32 @@ function setBirthtimeUnknownDisplay() {
 function syncBirthtimeGroupValue() {
   sanitizeTimeSegment(birthtimeHourInput);
   sanitizeTimeSegment(birthtimeMinuteInput);
+  sanitizeTimeSegment(birthtimeSecondInput);
   clampTimeGroupValues(birthtimePartsGroup);
 
   const explicit = birthtimeGroup.dataset.explicit === "true";
   const hour = birthtimeHourInput.value;
   const minute = birthtimeMinuteInput.value;
+  const second = birthtimeSecondInput.value;
 
   if (!explicit) {
-    setTimeGroupDisplay(birthtimePartsGroup, "00", "00");
+    setTimeGroupDisplay(birthtimePartsGroup, "00", "00", "00");
     birthtimeInput.value = "";
     clearTimeGroupError(birthtimePartsGroup, birthtimePartsGroup.emptyHint);
     return true;
   }
 
-  if (!hour && !minute) {
+  if (!hour && !minute && !second) {
     setBirthtimeUnknownDisplay();
     return true;
   }
 
-  const composed = hour.length === 2 && minute.length === 2 ? `${hour}:${minute}` : "";
+  const composed = hour.length === 2 && minute.length === 2 && second.length === 2 ? `${hour}:${minute}:${second}` : "";
 
   if (!parseTimeParts(composed)) {
     birthtimeGroup.classList.add("is-invalid");
     birthtimeHint.classList.add("is-error");
-    birthtimeHint.textContent = "请输入有效时刻，并确认小时在 00-23、分钟在 00-59。";
+    birthtimeHint.textContent = "请输入有效时刻，并确认小时在 00-23、分钟和秒数都在 00-59。";
     birthtimeInput.value = "";
     return false;
   }
@@ -834,7 +848,7 @@ function validateBirthtimeGroup() {
 }
 
 function setupBirthtimeGroup() {
-  const segments = [birthtimeHourInput, birthtimeMinuteInput];
+  const segments = [birthtimeHourInput, birthtimeMinuteInput, birthtimeSecondInput];
 
   segments.forEach((input, index) => {
     input.addEventListener("focus", () => {
@@ -886,8 +900,8 @@ function setReadonlyTimeGroupValue(group, timeString) {
     return;
   }
 
-  group.hiddenInput.value = `${pad2(parts.hour)}:${pad2(parts.minute)}`;
-  setTimeGroupDisplay(group, pad2(parts.hour), pad2(parts.minute));
+  group.hiddenInput.value = `${pad2(parts.hour)}:${pad2(parts.minute)}:${pad2(parts.second)}`;
+  setTimeGroupDisplay(group, pad2(parts.hour), pad2(parts.minute), pad2(parts.second));
   clearTimeGroupError(group, group.emptyHint);
 }
 
@@ -939,18 +953,20 @@ function bandOf(score) {
   return "low";
 }
 
-function calcBaseContext(birthdate, zodiac, targetDate, birthtime = "", targetTime = "00:00") {
+function calcBaseContext(birthdate, zodiac, targetDate, birthtime = "", targetTime = "00:00:00") {
   const birthDay = requireValidDate(birthdate).parsed;
   const targetDay = requireValidDate(targetDate).parsed;
   const birthTimeParts = birthtime ? requireValidTime(birthtime) : null;
   const targetTimeParts = requireValidTime(targetTime);
   const zodiacIndex = zodiacs.indexOf(zodiac);
 
-  const birthTimeWeight = birthTimeParts ? birthTimeParts.hour + Math.floor(birthTimeParts.minute / 10) : 0;
-  const targetTimeWeight = targetTimeParts.hour + Math.floor(targetTimeParts.minute / 10);
+  const birthTimeWeight = birthTimeParts
+    ? birthTimeParts.hour + Math.floor(birthTimeParts.minute / 10) + Math.floor(birthTimeParts.second / 15)
+    : 0;
+  const targetTimeWeight = targetTimeParts.hour + Math.floor(targetTimeParts.minute / 10) + Math.floor(targetTimeParts.second / 15);
   const birthRhythm = ((birthDay.getFullYear() % 100) + (birthDay.getMonth() + 1) * 2 + birthDay.getDate() + birthTimeWeight) % 19;
   const dayRhythm = (((targetDay.getMonth() + 1) * 3) + targetDay.getDate() + targetDay.getDay() * 4 + targetTimeWeight) % 19;
-  const zodiacHarmony = ((zodiacIndex + 1) * 7 + targetDay.getDate() * 3 + targetDay.getDay() * 2 + targetTimeParts.hour) % 19;
+  const zodiacHarmony = ((zodiacIndex + 1) * 7 + targetDay.getDate() * 3 + targetDay.getDay() * 2 + targetTimeParts.hour + Math.floor(targetTimeParts.second / 15)) % 19;
 
   const baseSeed = hashString(`${birthdate}|${birthtime || "--:--"}|${zodiac}|${targetDate}|${targetTime}`);
   const oracleSeed = hashString(`${birthdate}|${birthtime || "--:--"}|${zodiac}|${targetDate}|${targetTime}|oracle`);
@@ -1648,7 +1664,7 @@ nicknameInput.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", refreshBirthdateDerivedState);
 });
 
-[birthtimeHourInput, birthtimeMinuteInput].forEach((input) => {
+[birthtimeHourInput, birthtimeMinuteInput, birthtimeSecondInput].forEach((input) => {
   input.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", updateFocusExample);
 });
