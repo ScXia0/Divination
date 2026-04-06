@@ -831,6 +831,50 @@ function buildGeneralContext() {
   return "未填写具体问题时，这次会按整体命盘解读；基础分数只由生日、生肖、占卜日期与固定抽到的塔罗、卦象共同决定。";
 }
 
+function stripEndingPunctuation(text) {
+  return text.replace(/[。！？；，、]+$/u, "");
+}
+
+function sortedMetricEntries(metrics) {
+  return Object.entries(metrics).sort((a, b) => b[1].score - a[1].score);
+}
+
+function buildInsightData(result) {
+  const entries = sortedMetricEntries(result.metrics);
+  const [, dominantMetric] = entries[0];
+  const [, weakestMetric] = entries[entries.length - 1];
+
+  const rhythmTitle = result.totalScore >= 78
+    ? "适合主动推进"
+    : result.totalScore >= 64
+      ? "适合稳步推进"
+      : "适合先收后放";
+
+  const rhythmText = result.totalScore >= 78
+    ? `整体底盘偏顺，优先推进${dominantMetric.label}相关事项，会更容易拿到回应。`
+    : result.totalScore >= 64
+      ? `今天更适合把节奏放稳，先从${dominantMetric.label}这一面入手，再慢慢带动其他面向。`
+      : `今天先别平均发力，把动作收束到最稳的${dominantMetric.label}位，反而更容易守住运势。`;
+
+  const entryTitle = result.mode === "question" ? "这件事怎么切入" : "今天先从哪开始";
+  const entryText = result.mode === "question"
+    ? `你问的这件事，适合优先借${dominantMetric.label}位的力量切入，同时少在${weakestMetric.label}位上过度用力。可先做：${result.dailyAction}。`
+    : `今天先从${dominantMetric.label}位最具体的一件事开始，把这股顺势带起来。可先做：${result.dailyAction}。`;
+
+  return {
+    dominantTitle: `${dominantMetric.label} ${scoreLabel(dominantMetric.score)}`,
+    dominantText: `今天最亮的是${dominantMetric.label}位，${dominantMetric.text}`,
+    cautionTitle: `${weakestMetric.label} ${scoreLabel(weakestMetric.score)}`,
+    cautionText: `今天更需要稳住的是${weakestMetric.label}位，${weakestMetric.text}`,
+    patternTitle: `${result.tarot.name}${result.tarot.orientation} · ${result.hexagram.name}`,
+    patternText: `塔罗提示${stripEndingPunctuation(result.tarot.message)}；卦象提醒${stripEndingPunctuation(result.hexagram.text)}。`,
+    rhythmTitle,
+    rhythmText,
+    entryTitle,
+    entryText
+  };
+}
+
 function resolveDominantCategory(metrics) {
   const sorted = Object.entries(metrics).sort((a, b) => b[1].score - a[1].score);
   return sorted[0]?.[0] || "overall";
@@ -1129,6 +1173,20 @@ function renderMetric(metricKey, metricResult) {
   document.getElementById(`${metricKey}-source`).textContent = metricResult.source;
 }
 
+function renderInsights(result) {
+  const insights = buildInsightData(result);
+  document.getElementById("insight-dominant-title").textContent = insights.dominantTitle;
+  document.getElementById("insight-dominant-text").textContent = insights.dominantText;
+  document.getElementById("insight-caution-title").textContent = insights.cautionTitle;
+  document.getElementById("insight-caution-text").textContent = insights.cautionText;
+  document.getElementById("insight-pattern-title").textContent = insights.patternTitle;
+  document.getElementById("insight-pattern-text").textContent = insights.patternText;
+  document.getElementById("insight-rhythm-title").textContent = insights.rhythmTitle;
+  document.getElementById("insight-rhythm-text").textContent = insights.rhythmText;
+  document.getElementById("insight-entry-title").textContent = insights.entryTitle;
+  document.getElementById("insight-entry-text").textContent = insights.entryText;
+}
+
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
@@ -1159,6 +1217,7 @@ function renderResult(result) {
   document.getElementById("fortune-summary").textContent = result.summary;
   document.getElementById("fortune-context").textContent = result.context;
   document.getElementById("fortune-score").textContent = result.totalScore;
+  renderInsights(result);
 
   generalView.classList.toggle("hidden", result.mode !== "general");
   questionView.classList.toggle("hidden", result.mode !== "question");

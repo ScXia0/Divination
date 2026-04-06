@@ -1,17 +1,14 @@
 :root {
   --bg: #07101b;
-  --bg-deep: #040812;
   --panel: rgba(10, 17, 31, 0.82);
   --panel-strong: rgba(14, 23, 40, 0.94);
   --panel-soft: rgba(17, 28, 47, 0.74);
   --line: rgba(212, 176, 118, 0.16);
-  --line-strong: rgba(212, 176, 118, 0.34);
   --ink: #f8f1e4;
   --muted: #b6ab9d;
   --gold: #d4a765;
   --gold-soft: #efc98d;
   --accent: #8f5366;
-  --accent-soft: rgba(143, 83, 102, 0.22);
   --green: #8eb9a2;
   --shadow: 0 30px 80px rgba(1, 3, 8, 0.55);
   --glow: 0 0 0 1px rgba(212, 176, 118, 0.08), 0 16px 44px rgba(0, 0, 0, 0.34);
@@ -116,8 +113,12 @@ p {
 }
 
 .hero-copy,
-.hero-visual {
-  padding: 28px;
+.hero-visual,
+.form-panel,
+.result-panel,
+.guide-panel {
+  min-width: 0;
+  padding: 24px;
 }
 
 .eyebrow {
@@ -131,9 +132,12 @@ p {
 
 .hero-copy h1 {
   margin: 0;
-  font-size: clamp(3rem, 7vw, 5.6rem);
-  line-height: 0.98;
-  letter-spacing: 0.04em;
+  max-width: 100%;
+  font-size: clamp(2.8rem, 6.2vw, 4.95rem);
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hero-text {
@@ -172,12 +176,34 @@ p {
   margin-top: 24px;
 }
 
+.signal-card,
+.guide-card,
+.insight-card,
+.metric-card,
+.ritual-card,
+.oracle-card,
+.message-block,
+.question-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: var(--glow);
+}
+
+.signal-card,
+.guide-card,
+.insight-card,
+.metric-card,
+.ritual-card,
+.oracle-card,
+.message-block,
+.question-card {
+  border: 1px solid rgba(212, 176, 118, 0.11);
+  background: linear-gradient(180deg, rgba(14, 23, 40, 0.95), rgba(9, 15, 28, 0.94));
+}
+
 .signal-card {
   padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(212, 176, 118, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-  box-shadow: var(--glow);
 }
 
 .signal-card span,
@@ -188,7 +214,8 @@ p {
 .metric-card span,
 .ritual-card span,
 .guide-card span,
-.score-wrap span {
+.score-wrap span,
+.insight-card span {
   display: block;
   color: var(--gold-soft);
   font-size: 0.78rem;
@@ -241,7 +268,6 @@ p {
   border-radius: 50%;
   background: radial-gradient(circle at 34% 32%, rgba(255, 249, 232, 0.95), rgba(212, 176, 118, 0.72) 58%, rgba(212, 176, 118, 0.08) 100%);
   box-shadow: 0 0 50px rgba(212, 176, 118, 0.24);
-  opacity: 0.95;
 }
 
 .tarot-stack {
@@ -350,8 +376,20 @@ p {
   line-height: 1.25;
 }
 
-.hero-legend p:last-child {
-  margin-top: 12px;
+.hero-legend p:last-child,
+.fortune-context,
+.empty-state,
+.focus-example p,
+.guide-footnote,
+.metric-card p,
+.metric-source,
+.oracle-card p,
+.message-block p,
+.support-text,
+.question-reason,
+.question-ai-note,
+.disclaimer,
+.insight-card p {
   color: var(--muted);
   line-height: 1.8;
 }
@@ -368,12 +406,6 @@ p {
   display: grid;
   gap: 18px;
   align-content: start;
-}
-
-.form-panel,
-.result-panel,
-.guide-panel {
-  padding: 24px;
 }
 
 .panel-head h2 {
@@ -448,9 +480,9 @@ textarea {
 
 .date-group {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 0.82fr));
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(116px, 0.9fr));
+  gap: 14px;
+  padding: 14px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
@@ -463,7 +495,8 @@ textarea {
 
 .date-cell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 52px;
+  grid-template-columns: minmax(0, 1fr) 56px;
+  min-width: 0;
   min-height: 76px;
   border-radius: 18px;
   overflow: hidden;
@@ -472,18 +505,24 @@ textarea {
 }
 
 .date-cell-year {
-  grid-template-columns: minmax(0, 1fr) 58px;
+  grid-template-columns: minmax(0, 1fr) 62px;
 }
 
 .date-segment {
   min-height: 100%;
-  padding: 0 18px;
+  min-width: 0;
+  padding: 0 12px;
   border: 0;
   border-radius: 0;
   background: transparent;
   text-align: center;
-  font-size: 1.05rem;
-  letter-spacing: 0.06em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 1.08rem;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  caret-color: var(--gold-soft);
+  -webkit-text-fill-color: var(--ink);
 }
 
 .date-divider {
@@ -491,7 +530,7 @@ textarea {
   place-items: center;
   border-left: 1px solid rgba(212, 176, 118, 0.12);
   color: var(--gold-soft);
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   letter-spacing: 0.18em;
 }
 
@@ -512,22 +551,6 @@ textarea {
   border-radius: 22px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(143, 83, 102, 0.11), rgba(13, 21, 39, 0.76));
-}
-
-.focus-example p,
-.guide-footnote,
-.empty-state,
-.fortune-context,
-.metric-card p,
-.metric-source,
-.oracle-card p,
-.message-block p,
-.support-text,
-.question-reason,
-.question-ai-note,
-.disclaimer {
-  color: var(--muted);
-  line-height: 1.8;
 }
 
 .focus-example-action {
@@ -574,11 +597,14 @@ textarea {
   margin-top: 18px;
 }
 
-.guide-card {
-  padding: 16px 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(212, 176, 118, 0.1);
-  background: rgba(255, 255, 255, 0.025);
+.guide-card,
+.insight-card,
+.metric-card,
+.ritual-card,
+.oracle-card,
+.message-block,
+.question-card {
+  padding: 18px;
 }
 
 .guide-card p {
@@ -630,7 +656,7 @@ textarea {
 
 .headline-card h3 {
   margin-top: 10px;
-  font-size: clamp(1.9rem, 3.4vw, 2.85rem);
+  font-size: clamp(1.9rem, 3.4vw, 2.75rem);
 }
 
 .fortune-context {
@@ -656,6 +682,7 @@ textarea {
   color: var(--gold);
 }
 
+.insight-grid,
 .metric-grid,
 .oracle-grid,
 .ritual-grid,
@@ -664,6 +691,7 @@ textarea {
   gap: 14px;
 }
 
+.insight-grid,
 .metric-grid,
 .oracle-grid,
 .question-support-grid {
@@ -674,33 +702,37 @@ textarea {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.metric-card,
-.ritual-card,
-.oracle-card,
-.message-block,
-.question-card,
-.guide-card {
-  position: relative;
-  overflow: hidden;
+.insight-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 158px;
 }
 
-.metric-card,
-.ritual-card,
-.oracle-card,
-.message-block,
-.question-card {
-  padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(212, 176, 118, 0.11);
-  background: linear-gradient(180deg, rgba(14, 23, 40, 0.95), rgba(9, 15, 28, 0.94));
-  box-shadow: var(--glow);
+.insight-card-wide {
+  grid-column: 1 / -1;
+  min-height: 0;
 }
 
-.metric-card strong,
-.ritual-card strong {
+.insight-card strong {
   display: block;
-  margin: 10px 0 12px;
-  font-size: 1.7rem;
+  font-size: 1.42rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.metric-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 218px;
+}
+
+.metric-card strong {
+  display: block;
+  font-size: 1.98rem;
+  line-height: 1.1;
+  color: var(--gold-soft);
 }
 
 .metric-card.active-focus {
@@ -709,10 +741,24 @@ textarea {
 }
 
 .metric-source {
-  margin-top: 12px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid rgba(212, 176, 118, 0.12);
   font-size: 0.84rem;
+}
+
+.ritual-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 142px;
+}
+
+.ritual-card strong,
+.question-support-grid .ritual-card strong {
+  display: block;
+  font-size: 1.55rem;
+  color: var(--ink);
 }
 
 .oracle-card h3,
@@ -724,10 +770,6 @@ textarea {
 .oracle-card p + p,
 .question-card p + p {
   margin-top: 10px;
-}
-
-.question-card {
-  padding: 22px;
 }
 
 .question-verdict {
@@ -761,10 +803,6 @@ textarea {
   background: rgba(222, 108, 111, 0.08);
 }
 
-.message-block {
-  padding: 22px;
-}
-
 .disclaimer {
   font-size: 0.88rem;
 }
@@ -793,11 +831,16 @@ textarea {
   }
 
   .hero-signals,
+  .insight-grid,
   .metric-grid,
   .oracle-grid,
   .question-support-grid,
   .ritual-grid {
     grid-template-columns: 1fr;
+  }
+
+  .insight-card-wide {
+    grid-column: auto;
   }
 
   .guide-grid {
@@ -820,7 +863,7 @@ textarea {
   }
 
   .hero-copy h1 {
-    font-size: 2.8rem;
+    font-size: 2.7rem;
   }
 
   .hero-visual {
