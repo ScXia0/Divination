@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700;900&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
@@ -19,164 +19,227 @@
   <body>
     <div class="page-shell">
       <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Daily Divination</p>
+        <div class="hero-copy panel">
+          <p class="eyebrow">Arcana For The Day</p>
           <h1>XscDivination</h1>
           <p class="hero-text">
-            将塔罗意象、周易卦象与生肖日运组合成一张属于你的今日命盘。适合做晨间仪式感，也适合分享给朋友一起玩。
+            把塔罗意象、周易卦象与生肖日运熔成一张只属于你的今日命盘。适合晨间占卜，也适合在犹豫时给自己一点神秘而具体的指引。
           </p>
           <div class="hero-tags">
             <span>塔罗抽牌</span>
             <span>八卦启示</span>
             <span>生肖日运</span>
           </div>
+          <div class="hero-signals">
+            <article class="signal-card">
+              <span>命盘底盘</span>
+              <strong>稳定生成</strong>
+              <p>生日、生肖与日期共同决定基础运势，不会被临时问题打乱。</p>
+            </article>
+            <article class="signal-card">
+              <span>问题解读</span>
+              <strong>聚焦回答</strong>
+              <p>写下你真正想问的事，系统会在不改动底盘的前提下给出更贴身的回应。</p>
+            </article>
+          </div>
         </div>
-        <div class="hero-orb">
-          <div class="orb-glow"></div>
-          <div class="orb-core">
-            <span>灵感</span>
-            <strong>今日能量</strong>
+        <div class="hero-visual panel">
+          <div class="visual-stars"></div>
+          <div class="visual-moon"></div>
+          <div class="tarot-stack" aria-hidden="true">
+            <div class="tarot-card tarot-card-shadow"></div>
+            <div class="tarot-card tarot-card-back"></div>
+            <div class="tarot-card tarot-card-main">
+              <span class="card-kicker">XSC ARCANA</span>
+              <strong>今日命盘</strong>
+              <p>Tarot / Hexagram / Zodiac</p>
+            </div>
+          </div>
+          <div class="hero-legend">
+            <p class="section-kicker">占卜机制</p>
+            <h2>先定底盘，再解心念</h2>
+            <p>
+              基础命盘由规则稳定生成，今日心念只负责把回答聚焦到你当下最在意的那件事上，所以结果会更可信，也更像一场真正的占卜。
+            </p>
           </div>
         </div>
       </header>
 
       <main class="content-grid">
-        <section class="panel form-panel">
-          <div class="panel-head">
-            <p class="section-kicker">输入命盘</p>
-            <h2>填写你的今日占卜信息</h2>
-          </div>
-
-          <form id="divination-form" class="fortune-form">
-            <label>
-              <span>你的称呼</span>
-              <input
-                type="text"
-                id="nickname"
-                name="nickname"
-                maxlength="24"
-                placeholder="比如：小夏"
-              />
-            </label>
-
-            <label>
-              <span>生日</span>
-              <div class="date-group" id="birthdate-group" data-date-group="birthdate">
-                <input type="hidden" id="birthdate" name="birthdate" required />
-                <input
-                  type="text"
-                  id="birthdate-year"
-                  class="date-segment date-year"
-                  inputmode="numeric"
-                  autocomplete="bday-year"
-                  maxlength="4"
-                  placeholder="1997"
-                  aria-label="出生年份"
-                />
-                <span class="date-divider">年</span>
-                <input
-                  type="text"
-                  id="birthdate-month"
-                  class="date-segment date-month"
-                  inputmode="numeric"
-                  autocomplete="bday-month"
-                  maxlength="2"
-                  placeholder="08"
-                  aria-label="出生月份"
-                />
-                <span class="date-divider">月</span>
-                <input
-                  type="text"
-                  id="birthdate-day"
-                  class="date-segment date-day"
-                  inputmode="numeric"
-                  autocomplete="bday-day"
-                  maxlength="2"
-                  placeholder="09"
-                  aria-label="出生日期"
-                />
-                <span class="date-divider">日</span>
-              </div>
-              <p class="date-hint" id="birthdate-hint">请输入 4 位年份，以及 2 位月份和日期。</p>
-            </label>
-
-            <label>
-              <span>生肖</span>
-              <select id="zodiac" name="zodiac" required>
-                <option value="">请选择生肖</option>
-                <option value="鼠">鼠</option>
-                <option value="牛">牛</option>
-                <option value="虎">虎</option>
-                <option value="兔">兔</option>
-                <option value="龙">龙</option>
-                <option value="蛇">蛇</option>
-                <option value="马">马</option>
-                <option value="羊">羊</option>
-                <option value="猴">猴</option>
-                <option value="鸡">鸡</option>
-                <option value="狗">狗</option>
-                <option value="猪">猪</option>
-              </select>
-            </label>
-
-            <label>
-              <span>占卜日期</span>
-              <div class="date-group" id="target-date-group" data-date-group="target-date">
-                <input type="hidden" id="target-date" name="target-date" required />
-                <input
-                  type="text"
-                  id="target-date-year"
-                  class="date-segment date-year"
-                  inputmode="numeric"
-                  maxlength="4"
-                  placeholder="2026"
-                  aria-label="占卜年份"
-                />
-                <span class="date-divider">年</span>
-                <input
-                  type="text"
-                  id="target-date-month"
-                  class="date-segment date-month"
-                  inputmode="numeric"
-                  maxlength="2"
-                  placeholder="04"
-                  aria-label="占卜月份"
-                />
-                <span class="date-divider">月</span>
-                <input
-                  type="text"
-                  id="target-date-day"
-                  class="date-segment date-day"
-                  inputmode="numeric"
-                  maxlength="2"
-                  placeholder="06"
-                  aria-label="占卜日期"
-                />
-                <span class="date-divider">日</span>
-              </div>
-              <p class="date-hint" id="target-date-hint">默认填入今天，也可以手动改成别的日期。</p>
-            </label>
-
-            <label>
-              <span>今日心念 / 想问的问题</span>
-              <textarea
-                id="focus"
-                name="focus"
-                rows="4"
-                maxlength="120"
-                placeholder="比如：我今天适合表白吗？"
-              ></textarea>
-            </label>
-
-            <div class="focus-example" id="focus-example">
-              <span class="focus-example-label">示例问题</span>
-              <p id="focus-example-text">不知道怎么写？比如：我今天适合表白吗？</p>
-              <button type="button" id="focus-example-action" class="focus-example-action">用这个例子</button>
+        <div class="form-column">
+          <section class="panel form-panel">
+            <div class="panel-head">
+              <p class="section-kicker">输入命盘</p>
+              <h2>填写你的今日占卜信息</h2>
             </div>
 
-            <button class="primary-btn" type="submit">开启今日占卜</button>
-          </form>
-        </section>
+            <form id="divination-form" class="fortune-form">
+              <label>
+                <span>你的称呼</span>
+                <input
+                  type="text"
+                  id="nickname"
+                  name="nickname"
+                  maxlength="24"
+                  placeholder="比如：小夏"
+                />
+              </label>
+
+              <label>
+                <span>生日</span>
+                <div class="date-group" id="birthdate-group" data-date-group="birthdate">
+                  <input type="hidden" id="birthdate" name="birthdate" required />
+                  <div class="date-cell date-cell-year">
+                    <input
+                      type="text"
+                      id="birthdate-year"
+                      class="date-segment date-year"
+                      inputmode="numeric"
+                      autocomplete="bday-year"
+                      maxlength="4"
+                      placeholder="1997"
+                      aria-label="出生年份"
+                    />
+                    <span class="date-divider">年</span>
+                  </div>
+                  <div class="date-cell">
+                    <input
+                      type="text"
+                      id="birthdate-month"
+                      class="date-segment date-month"
+                      inputmode="numeric"
+                      autocomplete="bday-month"
+                      maxlength="2"
+                      placeholder="08"
+                      aria-label="出生月份"
+                    />
+                    <span class="date-divider">月</span>
+                  </div>
+                  <div class="date-cell">
+                    <input
+                      type="text"
+                      id="birthdate-day"
+                      class="date-segment date-day"
+                      inputmode="numeric"
+                      autocomplete="bday-day"
+                      maxlength="2"
+                      placeholder="09"
+                      aria-label="出生日期"
+                    />
+                    <span class="date-divider">日</span>
+                  </div>
+                </div>
+                <p class="date-hint" id="birthdate-hint">请输入 4 位年份，以及 2 位月份和日期。</p>
+              </label>
+
+              <label>
+                <span>生肖</span>
+                <select id="zodiac" name="zodiac" required>
+                  <option value="">请选择生肖</option>
+                  <option value="鼠">鼠</option>
+                  <option value="牛">牛</option>
+                  <option value="虎">虎</option>
+                  <option value="兔">兔</option>
+                  <option value="龙">龙</option>
+                  <option value="蛇">蛇</option>
+                  <option value="马">马</option>
+                  <option value="羊">羊</option>
+                  <option value="猴">猴</option>
+                  <option value="鸡">鸡</option>
+                  <option value="狗">狗</option>
+                  <option value="猪">猪</option>
+                </select>
+              </label>
+
+              <label>
+                <span>占卜日期</span>
+                <div class="date-group" id="target-date-group" data-date-group="target-date">
+                  <input type="hidden" id="target-date" name="target-date" required />
+                  <div class="date-cell date-cell-year">
+                    <input
+                      type="text"
+                      id="target-date-year"
+                      class="date-segment date-year"
+                      inputmode="numeric"
+                      maxlength="4"
+                      placeholder="2026"
+                      aria-label="占卜年份"
+                    />
+                    <span class="date-divider">年</span>
+                  </div>
+                  <div class="date-cell">
+                    <input
+                      type="text"
+                      id="target-date-month"
+                      class="date-segment date-month"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="04"
+                      aria-label="占卜月份"
+                    />
+                    <span class="date-divider">月</span>
+                  </div>
+                  <div class="date-cell">
+                    <input
+                      type="text"
+                      id="target-date-day"
+                      class="date-segment date-day"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="06"
+                      aria-label="占卜日期"
+                    />
+                    <span class="date-divider">日</span>
+                  </div>
+                </div>
+                <p class="date-hint" id="target-date-hint">默认填入今天，也可以手动改成别的日期。</p>
+              </label>
+
+              <label>
+                <span>今日心念 / 想问的问题</span>
+                <textarea
+                  id="focus"
+                  name="focus"
+                  rows="4"
+                  maxlength="120"
+                  placeholder="比如：我今天适合表白吗？"
+                ></textarea>
+              </label>
+
+              <div class="focus-example" id="focus-example">
+                <span class="focus-example-label">示例问题</span>
+                <p id="focus-example-text">不知道怎么写？比如：我今天适合表白吗？</p>
+                <button type="button" id="focus-example-action" class="focus-example-action">用这个例子</button>
+              </div>
+
+              <button class="primary-btn" type="submit">开启今日占卜</button>
+            </form>
+          </section>
+
+          <aside class="panel guide-panel">
+            <div class="panel-head compact">
+              <p class="section-kicker">提问灵感</p>
+              <h2>这样问，更像真的在占卜</h2>
+            </div>
+            <div class="guide-grid">
+              <article class="guide-card">
+                <span>感情</span>
+                <p>我今天适合表白吗？如果适合，怎么说会更自然？</p>
+              </article>
+              <article class="guide-card">
+                <span>事业</span>
+                <p>我今天要不要主动跟上司聊这件事，时机成熟吗？</p>
+              </article>
+              <article class="guide-card">
+                <span>选择</span>
+                <p>我今天适合推进，还是应该再观察一阵子？</p>
+              </article>
+            </div>
+            <p class="guide-footnote">
+              不填今日心念时，会展示你的整体命盘；写下具体问题后，系统会保留基础运势不变，只把解读聚焦到你真正关心的事情上。
+            </p>
+          </aside>
+        </div>
 
         <section class="panel result-panel">
           <div class="panel-head">
