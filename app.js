@@ -1191,6 +1191,12 @@ function renderInsights(result) {
   document.getElementById("insight-entry-text").textContent = insights.entryText;
 }
 
+function scrollQuestionResultIntoView() {
+  requestAnimationFrame(() => {
+    questionView.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
@@ -1350,6 +1356,8 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  scrollQuestionResultIntoView();
+
   const requestId = ++latestQuestionRequestId;
 
   try {
@@ -1358,6 +1366,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     renderResult(enhancedResult);
+    scrollQuestionResultIntoView();
   } catch (error) {
     if (requestId !== latestQuestionRequestId) {
       return;
@@ -1366,6 +1375,7 @@ form.addEventListener("submit", async (event) => {
       ? error.message
       : "AI 深度解读暂时没有成功，当前显示的是本地规则结果。";
     renderResult(markQuestionFallback(result, message));
+    scrollQuestionResultIntoView();
   }
 });
 
