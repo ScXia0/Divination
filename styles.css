@@ -607,6 +607,7 @@ textarea {
 }
 
 .ask-actions,
+.guide-actions,
 .headline-actions,
 .question-actions {
   display: flex;
@@ -701,6 +702,10 @@ textarea {
   font-size: 0.92rem;
 }
 
+.guide-actions {
+  margin-top: 18px;
+}
+
 .empty-state {
   margin-top: 18px;
   padding: 22px;
@@ -709,16 +714,16 @@ textarea {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.hidden {
-  display: none;
-}
-
 .result-view,
 .result-mode,
 .question-view {
   display: grid;
   gap: 16px;
   margin-top: 18px;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .headline-card {

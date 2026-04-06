@@ -427,6 +427,7 @@ const askModule = document.getElementById("ask-module");
 const askSubmitButton = document.getElementById("ask-submit-btn");
 const goAskButton = document.getElementById("go-ask-button");
 const backToScoreButton = document.getElementById("back-to-score-button");
+const guideAskButton = document.getElementById("guide-ask-button");
 const headlineCard = document.getElementById("headline-card");
 const questionCard = document.getElementById("question-card");
 const birthdateGroup = document.getElementById("birthdate-group");
@@ -1522,6 +1523,7 @@ function renderBaseResult(result) {
 
   generalView.classList.remove("hidden");
   goAskButton.classList.remove("hidden");
+  guideAskButton.classList.remove("hidden");
   renderMetric("career", result.metrics.career);
   renderMetric("love", result.metrics.love);
   renderMetric("wealth", result.metrics.wealth);
@@ -1780,6 +1782,13 @@ nicknameInput.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", updateFocusExample);
 });
 goAskButton.addEventListener("click", () => {
+  setAskModuleVisible(true);
+  setAskSubmitLoading(false);
+  scrollAskModuleIntoView();
+  focusInput.focus();
+});
+
+guideAskButton.addEventListener("click", () => {
   setAskModuleVisible(true);
   setAskSubmitLoading(false);
   scrollAskModuleIntoView();
