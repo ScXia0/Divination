@@ -1458,14 +1458,8 @@ function scrollQuestionResultIntoView() {
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
-  questionAiNote.textContent = question.aiNote || "";
-  questionAiNote.className = "question-ai-note";
-  if (question.aiState) {
-    questionAiNote.classList.add(question.aiState);
-    questionAiNote.classList.remove("hidden");
-  } else {
-    questionAiNote.classList.add("hidden");
-  }
+  questionAiNote.textContent = "";
+  questionAiNote.className = "question-ai-note hidden";
   document.getElementById("question-reason").textContent = question.reason;
   document.getElementById("question-relevant-score").textContent = question.relevantTitle;
   document.getElementById("question-relevant-text").textContent = question.relevantText;
