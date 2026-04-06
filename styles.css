@@ -79,7 +79,7 @@ p {
 }
 
 .page-shell {
-  width: min(100% - 36px, 1380px);
+  width: min(100% - 24px, 1380px);
   margin: 0 auto;
   padding: 28px 0 56px;
 }
@@ -480,7 +480,7 @@ textarea {
 
 .date-group {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(116px, 0.9fr));
+  grid-template-columns: minmax(148px, 1.35fr) repeat(2, minmax(122px, 0.9fr));
   gap: 14px;
   padding: 14px;
   border-radius: 24px;
@@ -495,7 +495,7 @@ textarea {
 
 .date-cell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 56px;
+  grid-template-columns: minmax(76px, 1fr) 56px;
   min-width: 0;
   min-height: 76px;
   border-radius: 18px;
@@ -505,13 +505,13 @@ textarea {
 }
 
 .date-cell-year {
-  grid-template-columns: minmax(0, 1fr) 62px;
+  grid-template-columns: minmax(112px, 1fr) 62px;
 }
 
 .date-segment {
   min-height: 100%;
   min-width: 0;
-  padding: 0 12px;
+  padding: 0 10px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -850,7 +850,7 @@ textarea {
 
 @media (max-width: 720px) {
   .page-shell {
-    width: min(100% - 20px, 1380px);
+    width: min(100% - 16px, 1380px);
     padding-top: 20px;
   }
 
@@ -896,16 +896,19 @@ textarea {
 
   .date-group {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
   }
 
   .date-cell,
   .date-cell-year {
-    grid-template-columns: minmax(0, 1fr) 50px;
-    min-height: 64px;
+    grid-template-columns: minmax(92px, 1fr) 46px;
+    min-height: 62px;
   }
 
   .date-segment {
     font-size: 1rem;
+    padding: 0 8px;
   }
 
   .guide-grid {
@@ -919,5 +922,41 @@ textarea {
   .message-block h3,
   .question-card h3 {
     font-size: 1.55rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .page-shell {
+    width: min(100% - 12px, 1380px);
+  }
+
+  .form-panel,
+  .result-panel,
+  .guide-panel,
+  .hero-copy,
+  .hero-visual {
+    padding: 16px;
+  }
+
+  .date-group {
+    padding: 8px;
+  }
+
+  .date-cell {
+    grid-template-columns: minmax(84px, 1fr) 42px;
+  }
+
+  .date-cell-year {
+    grid-template-columns: minmax(104px, 1fr) 42px;
+  }
+
+  .date-divider {
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+  }
+
+  .date-segment {
+    font-size: 0.96rem;
+    padding: 0 6px;
   }
 }
