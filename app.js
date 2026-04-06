@@ -423,6 +423,12 @@ const focusInput = document.getElementById("focus");
 const focusExampleText = document.getElementById("focus-example-text");
 const focusExampleAction = document.getElementById("focus-example-action");
 const questionAiNote = document.getElementById("question-ai-note");
+const askModule = document.getElementById("ask-module");
+const askSubmitButton = document.getElementById("ask-submit-btn");
+const goAskButton = document.getElementById("go-ask-button");
+const backToScoreButton = document.getElementById("back-to-score-button");
+const headlineCard = document.getElementById("headline-card");
+const questionCard = document.getElementById("question-card");
 const birthdateGroup = document.getElementById("birthdate-group");
 const birthdateYearInput = document.getElementById("birthdate-year");
 const birthdateMonthInput = document.getElementById("birthdate-month");
@@ -481,8 +487,24 @@ const targetTimePartsGroup = {
   emptyHint: "占卜时刻会默认显示当前时间，并在你停留页面期间按秒持续刷新。"
 };
 let latestQuestionRequestId = 0;
+let latestGeneralResult = null;
+let latestQuestionResult = null;
 let targetDateIsManual = false;
 let liveTargetMomentTimer = 0;
+const defaultAskSubmitLabel = "解读这个问题";
+
+function invalidateQuestionRequest() {
+  latestQuestionRequestId += 1;
+}
+
+function setAskModuleVisible(isVisible) {
+  askModule.classList.toggle("hidden", !isVisible);
+}
+
+function setAskSubmitLoading(isLoading) {
+  askSubmitButton.disabled = isLoading;
+  askSubmitButton.textContent = isLoading ? "正在生成解答..." : defaultAskSubmitLabel;
+}
 
 function hashString(input) {
   let h1 = 1779033703;
@@ -1449,17 +1471,34 @@ function renderInsights(result) {
   document.getElementById("insight-entry-text").textContent = insights.entryText;
 }
 
+function scrollScoreResultIntoView() {
+  requestAnimationFrame(() => {
+    headlineCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
 function scrollQuestionResultIntoView() {
   requestAnimationFrame(() => {
-    questionView.scrollIntoView({ behavior: "smooth", block: "start" });
+    questionCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+function scrollAskModuleIntoView() {
+  requestAnimationFrame(() => {
+    askModule.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
-  questionAiNote.textContent = "";
-  questionAiNote.className = "question-ai-note hidden";
+  if (question.aiNote && question.aiState) {
+    questionAiNote.textContent = question.aiNote;
+    questionAiNote.className = `question-ai-note ${question.aiState}`;
+  } else {
+    questionAiNote.textContent = "";
+    questionAiNote.className = "question-ai-note hidden";
+  }
   document.getElementById("question-reason").textContent = question.reason;
   document.getElementById("question-relevant-score").textContent = question.relevantTitle;
   document.getElementById("question-relevant-text").textContent = question.relevantText;
@@ -1471,7 +1510,7 @@ function renderQuestion(question) {
   document.getElementById("question-encourage-text").textContent = question.encourageText;
 }
 
-function renderResult(result) {
+function renderBaseResult(result) {
   emptyState.classList.add("hidden");
   resultView.classList.remove("hidden");
 
@@ -1481,17 +1520,12 @@ function renderResult(result) {
   document.getElementById("fortune-score").textContent = result.totalScore;
   renderInsights(result);
 
-  generalView.classList.toggle("hidden", result.mode !== "general");
-  questionView.classList.toggle("hidden", result.mode !== "question");
-
-  if (result.mode === "general") {
-    renderMetric("career", result.metrics.career);
-    renderMetric("love", result.metrics.love);
-    renderMetric("wealth", result.metrics.wealth);
-    renderMetric("energy", result.metrics.energy);
-  } else {
-    renderQuestion(result.question);
-  }
+  generalView.classList.remove("hidden");
+  goAskButton.classList.remove("hidden");
+  renderMetric("career", result.metrics.career);
+  renderMetric("love", result.metrics.love);
+  renderMetric("wealth", result.metrics.wealth);
+  renderMetric("energy", result.metrics.energy);
 
   document.getElementById("tarot-name").textContent = result.tarot.name;
   document.getElementById("tarot-orientation").textContent = result.tarot.orientation;
@@ -1506,6 +1540,26 @@ function renderResult(result) {
   document.getElementById("lucky-direction").textContent = result.luckyDirection;
   document.getElementById("daily-action").textContent = result.dailyAction;
   document.getElementById("daily-guidance").textContent = result.guidance;
+}
+
+function renderQuestionSection(result) {
+  questionView.classList.toggle("hidden", !result);
+  backToScoreButton.classList.toggle("hidden", !result);
+
+  if (!result) {
+    return;
+  }
+
+  renderQuestion(result.question);
+}
+
+function renderDashboard() {
+  if (!latestGeneralResult) {
+    return;
+  }
+
+  renderBaseResult(latestGeneralResult);
+  renderQuestionSection(latestQuestionResult);
 }
 
 function generateDivination(formData) {
@@ -1587,41 +1641,94 @@ function setToday() {
 }
 
 function resetQuestionDraft() {
-  latestQuestionRequestId += 1;
+  invalidateQuestionRequest();
+  latestQuestionResult = null;
   if (focusInput.value.trim()) {
     focusInput.value = "";
   }
   updateFocusExample();
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
+function validateBaseInputs() {
   syncLiveTargetMoment(false);
   refreshBirthdateDerivedState();
   syncBirthtimeGroupValue();
   syncDateGroupValue(targetDateDatePartsGroup);
-  if (!validateDateGroup(birthdateDatePartsGroup) || !validateBirthtimeGroup() || !validateDateGroup(targetDateDatePartsGroup)) {
+  return validateDateGroup(birthdateDatePartsGroup)
+    && validateBirthtimeGroup()
+    && validateDateGroup(targetDateDatePartsGroup);
+}
+
+function buildBaseFormData() {
+  return new FormData(form);
+}
+
+function updateExampleFromFormData(formData, result) {
+  updateFocusExample({
+    context: {
+      baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("birthtime") || "--:--"}|${formData.get("zodiac")}|${formData.get("target-date")}|${formData.get("target-time")}`)
+    },
+    metrics: result.metrics
+  });
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!validateBaseInputs()) {
     return;
   }
-  const formData = new FormData(form);
+
+  invalidateQuestionRequest();
+  setAskModuleVisible(false);
+  setAskSubmitLoading(false);
+  const formData = buildBaseFormData();
   const result = generateDivination(formData);
-  renderResult(result);
-  updateFocusExample({ context: { baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("birthtime") || "--:--"}|${formData.get("zodiac")}|${formData.get("target-date")}|${formData.get("target-time")}`) }, metrics: result.metrics });
+  latestGeneralResult = result;
+  latestQuestionResult = null;
+  renderDashboard();
+  updateExampleFromFormData(formData, result);
+  scrollScoreResultIntoView();
+});
 
-  if (result.mode !== "question") {
+askSubmitButton.addEventListener("click", async () => {
+  if (askSubmitButton.disabled) {
     return;
   }
 
+  const rawQuestion = focusInput.value.trim();
+
+  if (!rawQuestion) {
+    focusInput.focus();
+    return;
+  }
+
+  if (!validateBaseInputs()) {
+    return;
+  }
+
+  const baseFormData = buildBaseFormData();
+  latestGeneralResult = generateDivination(baseFormData);
+
+  const questionFormData = buildBaseFormData();
+  questionFormData.set("focus", rawQuestion);
+  const result = generateDivination(questionFormData);
+  latestQuestionResult = result;
+  setAskModuleVisible(false);
+  setAskSubmitLoading(true);
+  renderDashboard();
+  updateExampleFromFormData(questionFormData, result);
   scrollQuestionResultIntoView();
 
   const requestId = ++latestQuestionRequestId;
 
   try {
-    const enhancedResult = await requestAiQuestionInterpretation(formData, result);
+    const enhancedResult = await requestAiQuestionInterpretation(questionFormData, result);
     if (requestId !== latestQuestionRequestId) {
       return;
     }
-    renderResult(enhancedResult);
+    latestQuestionResult = enhancedResult;
+    setAskSubmitLoading(false);
+    renderDashboard();
     scrollQuestionResultIntoView();
   } catch (error) {
     if (requestId !== latestQuestionRequestId) {
@@ -1630,7 +1737,9 @@ form.addEventListener("submit", async (event) => {
     const message = error instanceof Error
       ? error.message
       : "AI 深度解读暂时没有成功，当前显示的是本地规则结果。";
-    renderResult(markQuestionFallback(result, message));
+    latestQuestionResult = markQuestionFallback(result, message);
+    setAskSubmitLoading(false);
+    renderDashboard();
     scrollQuestionResultIntoView();
   }
 });
@@ -1670,6 +1779,21 @@ nicknameInput.addEventListener("input", resetQuestionDraft);
   });
   input.addEventListener("blur", updateFocusExample);
 });
+goAskButton.addEventListener("click", () => {
+  setAskModuleVisible(true);
+  setAskSubmitLoading(false);
+  scrollAskModuleIntoView();
+  focusInput.focus();
+});
+
+backToScoreButton.addEventListener("click", () => {
+  if (!latestGeneralResult || !latestQuestionResult) {
+    return;
+  }
+
+  scrollScoreResultIntoView();
+});
+
 focusExampleAction.addEventListener("click", () => {
   const example = focusExampleAction.dataset.example;
   if (example) {
