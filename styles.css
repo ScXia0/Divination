@@ -480,9 +480,9 @@ textarea {
 
 .date-group {
   display: grid;
-  grid-template-columns: minmax(152px, 1.5fr) repeat(2, minmax(118px, 0.85fr));
-  gap: 14px;
-  padding: 14px;
+  grid-template-columns: 1.26fr 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
@@ -495,9 +495,9 @@ textarea {
 
 .date-cell {
   display: grid;
-  grid-template-columns: minmax(76px, 1fr) 56px;
+  grid-template-columns: minmax(0, 1fr) 48px;
   min-width: 0;
-  min-height: 76px;
+  min-height: 68px;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(212, 176, 118, 0.12);
@@ -505,19 +505,19 @@ textarea {
 }
 
 .date-cell-year {
-  grid-template-columns: minmax(124px, 1fr) 58px;
+  grid-template-columns: minmax(0, 1fr) 54px;
 }
 
 .date-segment {
   min-height: 100%;
   min-width: 0;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 0;
   border-radius: 0;
   background: transparent;
   text-align: center;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 1.08rem;
+  font-size: clamp(0.94rem, 2vw, 1.08rem);
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -848,23 +848,6 @@ textarea {
   }
 }
 
-@media (max-width: 920px) {
-  .date-group {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .date-cell {
-    grid-template-columns: minmax(96px, 1fr) 48px;
-    min-height: 64px;
-  }
-
-  .date-cell-year {
-    grid-template-columns: minmax(138px, 1fr) 52px;
-  }
-}
-
 @media (max-width: 720px) {
   .page-shell {
     width: min(100% - 16px, 1380px);
@@ -912,24 +895,29 @@ textarea {
   }
 
   .date-group {
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px;
+    grid-template-columns: 1.22fr 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
   }
 
   .date-cell {
-    grid-template-columns: minmax(96px, 1fr) 46px;
-    min-height: 62px;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    min-height: 58px;
   }
 
   .date-cell-year {
-    grid-template-columns: minmax(132px, 1fr) 50px;
-    min-height: 62px;
+    grid-template-columns: minmax(0, 1fr) 46px;
+    min-height: 58px;
+  }
+
+  .date-divider {
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
   }
 
   .date-segment {
-    font-size: 1rem;
-    padding: 0 8px;
+    font-size: 0.96rem;
+    padding: 0 6px;
   }
 
   .guide-grid {
@@ -960,24 +948,26 @@ textarea {
   }
 
   .date-group {
-    padding: 8px;
+    grid-template-columns: 1.18fr 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
   }
 
   .date-cell {
-    grid-template-columns: minmax(92px, 1fr) 42px;
+    grid-template-columns: minmax(0, 1fr) 38px;
   }
 
   .date-cell-year {
-    grid-template-columns: minmax(124px, 1fr) 42px;
+    grid-template-columns: minmax(0, 1fr) 42px;
   }
 
   .date-divider {
-    font-size: 0.88rem;
-    letter-spacing: 0.08em;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
   }
 
   .date-segment {
-    font-size: 0.96rem;
-    padding: 0 6px;
+    font-size: 0.9rem;
+    padding: 0 4px;
   }
 }
