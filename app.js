@@ -1265,6 +1265,58 @@ function buildVerdict(focusInfo, decisionLevel) {
   return set[decisionLevel];
 }
 
+function resolveDailyActivityDetail(rawFocus) {
+  const trimmed = rawFocus.trim();
+
+  if (trimmed.includes("羽毛球")) {
+    return {
+      noun: "打羽毛球",
+      focus: "运动状态",
+      go: "今天可以去打羽毛球，适合打轻松一点、别把自己逼得太满。",
+      maybe: "今天可以打羽毛球，但更适合打轻松局，别把时长和强度排太满。",
+      wait: "今天先别急着约高强度羽毛球局，等状态更顺一点再打会更舒服。"
+    };
+  }
+
+  if (trimmed.includes("打球") || trimmed.includes("篮球") || trimmed.includes("足球") || trimmed.includes("跑步") || trimmed.includes("健身") || trimmed.includes("游泳")) {
+    return {
+      noun: "去活动一下",
+      focus: "运动状态",
+      go: "今天适合去活动一下，但更适合顺着状态来，不必把强度拉满。",
+      maybe: "今天可以去动一动，不过更适合轻量一点，别把自己练得太狠。",
+      wait: "今天先别把运动安排得太重，等状态更顺一点再发力会更舒服。"
+    };
+  }
+
+  if (trimmed.includes("吃") || trimmed.includes("美食") || trimmed.includes("约饭") || trimmed.includes("聚餐") || trimmed.includes("探店")) {
+    return {
+      noun: "去吃点想吃的",
+      focus: "松弛感",
+      go: "今天适合去吃点想吃的，轻松一点安排，体验会更好。",
+      maybe: "今天可以去吃，但更适合顺路、轻松一点，不必为了吃专门把节奏打乱。",
+      wait: "今天不是最适合专门折腾去吃的一天，先按状态来会更舒服。"
+    };
+  }
+
+  if (trimmed.includes("看电影") || trimmed.includes("逛街") || trimmed.includes("出去玩") || trimmed.includes("去玩") || trimmed.includes("出门")) {
+    return {
+      noun: "出门放松一下",
+      focus: "出门节奏",
+      go: "今天适合出门放松一下，安排轻一点会更尽兴。",
+      maybe: "今天可以出门，但更适合轻松安排，不必把行程排太满。",
+      wait: "今天先别把出门计划定得太死，顺着状态来会更舒服。"
+    };
+  }
+
+  return {
+    noun: "去做这件事",
+    focus: "当天状态",
+    go: "今天适合去做这件事，轻松一点反而更容易玩得尽兴。",
+    maybe: "今天可以去，但更适合顺着状态安排，不必把节奏拉太满。",
+    wait: "今天不是完全不能去，只是更适合先看状态，再决定要不要出门。"
+  };
+}
+
 function buildPreparation(focusInfo, decisionLevel) {
   const preparations = {
     confession: {
@@ -1352,7 +1404,8 @@ function buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore
   const basis = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。塔罗「${tarot.name}」${tarot.orientation}提示“${tarot.message}”，卦象「${hexagram.name}」则提醒“${hexagram.text}”。`;
 
   if (focusInfo.type === "dailyActivity") {
-    return `${basis} 这类安排更看当天状态和松弛感，所以重点不是能不能去，而是适不适合轻松去、别把自己排得太满。`;
+    const detail = resolveDailyActivityDetail(focusInfo.raw);
+    return `${basis} 如果你问的是${detail.noun}，这件事更看${detail.focus}。所以重点不是抽象地问“能不能”，而是今天适不适合轻松去、别把自己排得太满。`;
   }
 
   return `${basis} 综合来看，这件事更适合按照今天的节奏来处理。`;
@@ -1372,7 +1425,8 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
 
   const relevantLabel = relevantMetric ? relevantMetric.label : "整体运势";
   const questionTitle = `关于“${rawFocus}”`;
-  const verdict = buildVerdict(focusInfo, decisionLevel);
+  const dailyActivityDetail = focusInfo.type === "dailyActivity" ? resolveDailyActivityDetail(rawFocus) : null;
+  const verdict = dailyActivityDetail ? dailyActivityDetail[decisionLevel] : buildVerdict(focusInfo, decisionLevel);
   const reason = buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore, tarot, hexagram);
   const relevantTitle = relevantMetric ? `主参考：${relevantLabel}位` : "主参考：整体命盘";
   const relevantText = relevantMetric
@@ -1382,8 +1436,18 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   const basisText = relevantMetric
     ? `${relevantMetric.text} ${relevantMetric.source}`
     : `这次问题没有明确落在单一领域，因此主要参考今日总运与两张占卜依据来回答。`;
-  const prepText = buildPreparation(focusInfo, decisionLevel);
-  const encourageText = buildEncouragement(focusInfo, decisionLevel);
+  const prepText = dailyActivityDetail
+    ? (decisionLevel === "go"
+      ? `如果决定${dailyActivityDetail.noun}，尽量把时间留得宽一点，别为了安排本身又把自己弄累。`
+      : decisionLevel === "maybe"
+        ? `如果想${dailyActivityDetail.noun}，先把它当成一件轻松的小安排，不必为了成行去硬凑状态。`
+        : `先别急着把${dailyActivityDetail.noun}定死，等状态、天气或同行节奏更顺一点再安排会更舒服。`)
+    : buildPreparation(focusInfo, decisionLevel);
+  const encourageText = dailyActivityDetail
+    ? (decisionLevel === "wait"
+      ? "今天先不勉强自己，也是一种很好的顺势。"
+      : "你可以把这件事当成放松，不必把它做成任务。")
+    : buildEncouragement(focusInfo, decisionLevel);
 
   return {
     relevantLabel,
