@@ -314,6 +314,11 @@ const questionRules = [
     keywords: ["花钱", "消费", "投资", "赚钱", "副业", "预算", "借钱", "回款", "买"]
   },
   {
+    type: "dailyActivity",
+    category: "energy",
+    keywords: ["羽毛球", "打球", "篮球", "足球", "跑步", "健身", "散步", "骑车", "游泳", "吃饭", "吃美食", "探店", "聚餐", "约饭", "逛街", "看电影", "出门", "出去玩", "去玩"]
+  },
+  {
     type: "energyAction",
     category: "energy",
     keywords: ["休息", "熬夜", "运动", "恢复", "出门", "旅行", "睡眠", "健康", "身体"]
@@ -1239,6 +1244,11 @@ function buildVerdict(focusInfo, decisionLevel) {
       maybe: "今天更适合先算清楚，再决定要不要动。",
       wait: "今天不适合凭直觉出手，先保守一点。"
     },
+    dailyActivity: {
+      go: "今天适合去做这件事，轻松一点反而更容易玩得尽兴。",
+      maybe: "今天可以去，但更适合顺着状态安排，不必把节奏拉太满。",
+      wait: "今天不是完全不能去，只是更适合先看状态，再决定要不要出门。"
+    },
     energyAction: {
       go: "今天适合把恢复和状态管理放进优先级。",
       maybe: "今天更适合稳住节奏，别把状态逼得太满。",
@@ -1277,6 +1287,11 @@ function buildPreparation(focusInfo, decisionLevel) {
       maybe: "先算明白投入产出，再决定要不要花、要不要投。",
       wait: "先按住冲动，今天更适合看清楚，而不是立刻拍板。"
     },
+    dailyActivity: {
+      go: "把时间、同行人和来回节奏安排轻一点，别把一次放松排成新的消耗。",
+      maybe: "先留出弹性，如果状态不错就去，累了就把安排改轻松一点。",
+      wait: "先别急着定死计划，等身体和心情都更顺一点，再去会更舒服。"
+    },
     energyAction: {
       go: "优先安排休息、补水和规律节奏，状态一稳，后面很多事都会跟着顺。",
       maybe: "减少分心和额外消耗，把今天当成调频日来过。",
@@ -1293,6 +1308,18 @@ function buildPreparation(focusInfo, decisionLevel) {
 }
 
 function buildEncouragement(focusInfo, decisionLevel) {
+  const typeOverrides = {
+    dailyActivity: {
+      go: "今天适合把自己放回轻松的节奏里，别想着一定要玩出结果。",
+      maybe: "能不能去不是重点，重点是别让放松变成新的负担。",
+      wait: "今天先照顾状态也没关系，等人和心情都更松一点，再去会更舒服。"
+    }
+  };
+
+  if (typeOverrides[focusInfo.type]) {
+    return typeOverrides[focusInfo.type][decisionLevel];
+  }
+
   const encouragements = {
     go: {
       love: "你不需要靠完美来换回应，真诚本身就很有力量。",
@@ -1321,6 +1348,16 @@ function buildEncouragement(focusInfo, decisionLevel) {
   return encouragements[decisionLevel][category];
 }
 
+function buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore, tarot, hexagram) {
+  const basis = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。塔罗「${tarot.name}」${tarot.orientation}提示“${tarot.message}”，卦象「${hexagram.name}」则提醒“${hexagram.text}”。`;
+
+  if (focusInfo.type === "dailyActivity") {
+    return `${basis} 这类安排更看当天状态和松弛感，所以重点不是能不能去，而是适不适合轻松去、别把自己排得太满。`;
+  }
+
+  return `${basis} 综合来看，这件事更适合按照今天的节奏来处理。`;
+}
+
 function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus, targetMomentLabel) {
   const relevantMetric = focusInfo.category === "overall" ? null : metrics[focusInfo.category];
   const relevantScore = relevantMetric ? relevantMetric.score : totalScore;
@@ -1336,7 +1373,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   const relevantLabel = relevantMetric ? relevantMetric.label : "整体运势";
   const questionTitle = `关于“${rawFocus}”`;
   const verdict = buildVerdict(focusInfo, decisionLevel);
-  const reason = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。塔罗「${tarot.name}」${tarot.orientation}提示“${tarot.message}”，卦象「${hexagram.name}」则提醒“${hexagram.text}”。综合来看，这件事更适合按照今天的节奏来处理。`;
+  const reason = buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore, tarot, hexagram);
   const relevantTitle = relevantMetric ? `主参考：${relevantLabel}位` : "主参考：整体命盘";
   const relevantText = relevantMetric
     ? `这次判断优先参考${relevantLabel}位，但也会同时结合今日总运 ${totalScore} 分、塔罗与卦象，不再重复展开四个固定模块。`
