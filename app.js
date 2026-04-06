@@ -1323,36 +1323,6 @@ function setToday() {
   setDateGroupValue(targetDateDatePartsGroup, localDate);
 }
 
-function canGenerateCurrentForm() {
-  return Boolean(
-    birthdateInput.value.trim()
-    && zodiacInput.value
-    && targetDateInput.value.trim()
-    && parseDateParts(birthdateInput.value.trim())
-    && parseDateParts(targetDateInput.value.trim())
-  );
-}
-
-function refreshRenderedResult() {
-  if (resultView.classList.contains("hidden") || !canGenerateCurrentForm()) {
-    updateFocusExample();
-    return;
-  }
-
-  latestQuestionRequestId += 1;
-  const formData = new FormData(form);
-  const result = generateDivination(formData);
-  renderResult(result);
-  updateFocusExample({
-    context: {
-      baseSeed: hashString(
-        `${formData.get("birthdate")}|${formData.get("zodiac")}|${formData.get("target-date")}`
-      )
-    },
-    metrics: result.metrics
-  });
-}
-
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!validateDateGroup(birthdateDatePartsGroup) || !validateDateGroup(targetDateDatePartsGroup)) {
@@ -1401,27 +1371,16 @@ updateFocusExample();
 
 [birthdateYearInput, birthdateMonthInput, birthdateDayInput].forEach((input) => {
   input.addEventListener("blur", refreshBirthdateDerivedState);
-  input.addEventListener("input", refreshRenderedResult);
 });
 
-zodiacInput.addEventListener("change", () => {
-  updateFocusExample();
-  refreshRenderedResult();
-});
+zodiacInput.addEventListener("change", updateFocusExample);
 [targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
-  input.addEventListener("blur", () => {
-    updateFocusExample();
-    refreshRenderedResult();
-  });
-  input.addEventListener("input", refreshRenderedResult);
+  input.addEventListener("blur", updateFocusExample);
 });
-nicknameInput.addEventListener("input", refreshRenderedResult);
-focusInput.addEventListener("input", refreshRenderedResult);
 focusExampleAction.addEventListener("click", () => {
   const example = focusExampleAction.dataset.example;
   if (example) {
     focusInput.value = example;
     focusInput.focus();
-    refreshRenderedResult();
   }
 });
