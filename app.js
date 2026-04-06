@@ -467,18 +467,105 @@ function resolveSummary(score) {
   return summaries.find((item) => score >= item.min) || summaries[summaries.length - 1];
 }
 
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function formatDateInput(rawValue) {
+  const digits = rawValue.replace(/\D/g, "").slice(0, 8);
+  const year = digits.slice(0, 4);
+  const month = digits.slice(4, 6);
+  const day = digits.slice(6, 8);
+
+  if (digits.length <= 4) {
+    return year;
+  }
+
+  if (digits.length <= 6) {
+    return `${year}/${month}`;
+  }
+
+  return `${year}/${month}/${day}`;
+}
+
+function parseDateParts(dateString) {
+  const match = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dateString.trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return null;
+  }
+
+  const parsed = new Date(year, month - 1, day);
+  const isValid = parsed.getFullYear() === year
+    && parsed.getMonth() === month - 1
+    && parsed.getDate() === day;
+
+  if (!isValid) {
+    return null;
+  }
+
+  return { year, month, day, parsed };
+}
+
+function requireValidDate(dateString) {
+  const parts = parseDateParts(dateString);
+
+  if (!parts) {
+    throw new Error("invalid_date");
+  }
+
+  return parts;
+}
+
+function syncDateValidity(input) {
+  const value = input.value.trim();
+
+  if (!value) {
+    input.setCustomValidity("请输入日期，格式为 YYYY/MM/DD。");
+    return false;
+  }
+
+  if (!parseDateParts(value)) {
+    input.setCustomValidity("请输入有效日期，格式为 YYYY/MM/DD。");
+    return false;
+  }
+
+  input.setCustomValidity("");
+  return true;
+}
+
+function bindDateInput(input) {
+  input.addEventListener("input", () => {
+    input.value = formatDateInput(input.value);
+    syncDateValidity(input);
+  });
+
+  input.addEventListener("blur", () => {
+    input.value = formatDateInput(input.value);
+    syncDateValidity(input);
+  });
+}
+
 function inferZodiac(dateString) {
   if (!dateString) {
     return "";
   }
 
-  const year = new Date(dateString).getFullYear();
-
-  if (Number.isNaN(year)) {
+  const parts = parseDateParts(dateString);
+  if (!parts) {
     return "";
   }
 
-  return zodiacs[(year - 4 + 1200) % 12];
+  return zodiacs[(parts.year - 4 + 1200) % 12];
 }
 
 function centeredValue(rawValue, maxRaw, amplitude) {
@@ -498,8 +585,8 @@ function bandOf(score) {
 }
 
 function calcBaseContext(birthdate, zodiac, targetDate) {
-  const birthDay = new Date(birthdate);
-  const targetDay = new Date(targetDate);
+  const birthDay = requireValidDate(birthdate).parsed;
+  const targetDay = requireValidDate(targetDate).parsed;
   const zodiacIndex = zodiacs.indexOf(zodiac);
 
   const birthRhythm = ((birthDay.getFullYear() % 100) + (birthDay.getMonth() + 1) * 2 + birthDay.getDate()) % 19;
@@ -629,11 +716,15 @@ function resolveDominantCategory(metrics) {
 }
 
 function buildMetricsPreview() {
-  const birthdate = birthdateInput.value;
+  const birthdate = birthdateInput.value.trim();
   const zodiac = zodiacInput.value;
-  const targetDate = targetDateInput.value;
+  const targetDate = targetDateInput.value.trim();
 
   if (!birthdate || !zodiac || !targetDate) {
+    return null;
+  }
+
+  if (!parseDateParts(birthdate) || !parseDateParts(targetDate)) {
     return null;
   }
 
@@ -836,9 +927,9 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
 function buildAiPayload(formData, result) {
   return {
     nickname: formData.get("nickname")?.trim() || "你",
-    birthdate: formData.get("birthdate"),
+    birthdate: formData.get("birthdate")?.trim(),
     zodiac: formData.get("zodiac"),
-    targetDate: formData.get("target-date"),
+    targetDate: formData.get("target-date")?.trim(),
     question: formData.get("focus")?.trim() || "",
     totalScore: result.totalScore,
     title: result.title,
@@ -977,9 +1068,9 @@ function renderResult(result) {
 
 function generateDivination(formData) {
   const nickname = formData.get("nickname")?.trim() || "你";
-  const birthdate = formData.get("birthdate");
+  const birthdate = formData.get("birthdate")?.trim();
   const zodiac = formData.get("zodiac");
-  const targetDate = formData.get("target-date");
+  const targetDate = formData.get("target-date")?.trim();
   const rawFocus = formData.get("focus")?.trim() || "";
   const focusInfo = resolveFocusInfo(rawFocus);
 
@@ -1047,13 +1138,17 @@ function generateDivination(formData) {
 
 function setToday() {
   const today = new Date();
-  const offset = today.getTimezoneOffset() * 60000;
-  const localDate = new Date(today.getTime() - offset).toISOString().split("T")[0];
+  const localDate = `${today.getFullYear()}/${pad2(today.getMonth() + 1)}/${pad2(today.getDate())}`;
   document.getElementById("target-date").value = localDate;
+  syncDateValidity(targetDateInput);
 }
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!syncDateValidity(birthdateInput) || !syncDateValidity(targetDateInput)) {
+    form.reportValidity();
+    return;
+  }
   const formData = new FormData(form);
   const result = generateDivination(formData);
   renderResult(result);
@@ -1082,6 +1177,8 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+bindDateInput(birthdateInput);
+bindDateInput(targetDateInput);
 setToday();
 updateFocusExample();
 
