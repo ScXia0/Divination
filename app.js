@@ -415,8 +415,10 @@ const generalView = document.getElementById("general-view");
 const questionView = document.getElementById("question-view");
 const nicknameInput = document.getElementById("nickname");
 const birthdateInput = document.getElementById("birthdate");
+const birthtimeInput = document.getElementById("birthtime");
 const zodiacInput = document.getElementById("zodiac");
 const targetDateInput = document.getElementById("target-date");
+const targetTimeInput = document.getElementById("target-time");
 const focusInput = document.getElementById("focus");
 const focusExampleText = document.getElementById("focus-example-text");
 const focusExampleAction = document.getElementById("focus-example-action");
@@ -426,11 +428,19 @@ const birthdateYearInput = document.getElementById("birthdate-year");
 const birthdateMonthInput = document.getElementById("birthdate-month");
 const birthdateDayInput = document.getElementById("birthdate-day");
 const birthdateHint = document.getElementById("birthdate-hint");
+const birthtimeGroup = document.getElementById("birthtime-group");
+const birthtimeHourInput = document.getElementById("birthtime-hour");
+const birthtimeMinuteInput = document.getElementById("birthtime-minute");
+const birthtimeHint = document.getElementById("birthtime-hint");
 const targetDateGroup = document.getElementById("target-date-group");
 const targetDateYearInput = document.getElementById("target-date-year");
 const targetDateMonthInput = document.getElementById("target-date-month");
 const targetDateDayInput = document.getElementById("target-date-day");
 const targetDateHint = document.getElementById("target-date-hint");
+const targetTimeGroup = document.getElementById("target-time-group");
+const targetTimeHourInput = document.getElementById("target-time-hour");
+const targetTimeMinuteInput = document.getElementById("target-time-minute");
+const targetTimeHint = document.getElementById("target-time-hint");
 const birthdateDatePartsGroup = {
   group: birthdateGroup,
   hiddenInput: birthdateInput,
@@ -439,6 +449,15 @@ const birthdateDatePartsGroup = {
   dayInput: birthdateDayInput,
   hint: birthdateHint,
   emptyHint: "请输入 4 位年份，以及 2 位月份和日期。"
+};
+const birthtimePartsGroup = {
+  group: birthtimeGroup,
+  hiddenInput: birthtimeInput,
+  hourInput: birthtimeHourInput,
+  minuteInput: birthtimeMinuteInput,
+  hint: birthtimeHint,
+  emptyHint: "若记不清可保留 00:00 的参考显示；只有你主动填写后，才会计入命盘。",
+  activeHint: "出生时刻已纳入这次命盘计算。"
 };
 const targetDateDatePartsGroup = {
   group: targetDateGroup,
@@ -449,7 +468,17 @@ const targetDateDatePartsGroup = {
   hint: targetDateHint,
   emptyHint: "默认填入今天，也可以手动改成别的日期。"
 };
+const targetTimePartsGroup = {
+  group: targetTimeGroup,
+  hiddenInput: targetTimeInput,
+  hourInput: targetTimeHourInput,
+  minuteInput: targetTimeMinuteInput,
+  hint: targetTimeHint,
+  emptyHint: "占卜时刻会默认显示当前时间，并在你停留页面期间持续刷新。"
+};
 let latestQuestionRequestId = 0;
+let targetDateIsManual = false;
+let liveTargetMomentTimer = 0;
 
 function hashString(input) {
   let h1 = 1779033703;
@@ -530,6 +559,46 @@ function parseDateParts(dateString) {
 
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
+}
+
+function parseTimeParts(timeString) {
+  const match = /^(\d{2}):(\d{2})$/.exec(timeString.trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const [, hourText, minuteText] = match;
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return null;
+  }
+
+  return { hour, minute };
+}
+
+function requireValidTime(timeString) {
+  const parts = parseTimeParts(timeString);
+
+  if (!parts) {
+    throw new Error("invalid_time");
+  }
+
+  return parts;
+}
+
+function getCurrentMomentStrings() {
+  const now = new Date();
+  return {
+    date: `${now.getFullYear()}/${pad2(now.getMonth() + 1)}/${pad2(now.getDate())}`,
+    time: `${pad2(now.getHours())}:${pad2(now.getMinutes())}`
+  };
+}
+
+function buildTargetMomentLabel(targetDate, targetTime) {
+  return targetTime ? `${targetDate} ${targetTime}` : targetDate;
 }
 
 function requireValidDate(dateString) {
@@ -680,6 +749,167 @@ function setupDateGroup(group) {
   });
 }
 
+function sanitizeTimeSegment(input) {
+  input.value = input.value.replace(/\D/g, "").slice(0, 2);
+}
+
+function clampTimeGroupValues(group) {
+  if (group.hourInput.value.length === 2) {
+    group.hourInput.value = pad2(clamp(Number(group.hourInput.value), 0, 23));
+  }
+
+  if (group.minuteInput.value.length === 2) {
+    group.minuteInput.value = pad2(clamp(Number(group.minuteInput.value), 0, 59));
+  }
+}
+
+function setTimeGroupDisplay(group, hour, minute) {
+  group.hourInput.value = hour;
+  group.minuteInput.value = minute;
+}
+
+function clearTimeGroupError(group, message = group.emptyHint) {
+  group.group.classList.remove("is-invalid");
+  group.hint.classList.remove("is-error");
+  group.hint.textContent = message;
+}
+
+function setBirthtimeUnknownDisplay() {
+  birthtimeGroup.dataset.explicit = "false";
+  birthtimeInput.value = "";
+  setTimeGroupDisplay(birthtimePartsGroup, "00", "00");
+  clearTimeGroupError(birthtimePartsGroup, birthtimePartsGroup.emptyHint);
+}
+
+function syncBirthtimeGroupValue() {
+  sanitizeTimeSegment(birthtimeHourInput);
+  sanitizeTimeSegment(birthtimeMinuteInput);
+  clampTimeGroupValues(birthtimePartsGroup);
+
+  const explicit = birthtimeGroup.dataset.explicit === "true";
+  const hour = birthtimeHourInput.value;
+  const minute = birthtimeMinuteInput.value;
+
+  if (!explicit) {
+    setTimeGroupDisplay(birthtimePartsGroup, "00", "00");
+    birthtimeInput.value = "";
+    clearTimeGroupError(birthtimePartsGroup, birthtimePartsGroup.emptyHint);
+    return true;
+  }
+
+  if (!hour && !minute) {
+    setBirthtimeUnknownDisplay();
+    return true;
+  }
+
+  const composed = hour.length === 2 && minute.length === 2 ? `${hour}:${minute}` : "";
+
+  if (!parseTimeParts(composed)) {
+    birthtimeGroup.classList.add("is-invalid");
+    birthtimeHint.classList.add("is-error");
+    birthtimeHint.textContent = "请输入有效时刻，并确认小时在 00-23、分钟在 00-59。";
+    birthtimeInput.value = "";
+    return false;
+  }
+
+  birthtimeInput.value = composed;
+  clearTimeGroupError(birthtimePartsGroup, birthtimePartsGroup.activeHint);
+  return true;
+}
+
+function validateBirthtimeGroup() {
+  const isValid = syncBirthtimeGroupValue();
+
+  if (isValid) {
+    return true;
+  }
+
+  if (!birthtimeHourInput.value) {
+    birthtimeHourInput.focus();
+  } else {
+    birthtimeMinuteInput.focus();
+  }
+
+  return false;
+}
+
+function setupBirthtimeGroup() {
+  const segments = [birthtimeHourInput, birthtimeMinuteInput];
+
+  segments.forEach((input, index) => {
+    input.addEventListener("focus", () => {
+      if (birthtimeGroup.dataset.explicit !== "true") {
+        input.select();
+      }
+    });
+
+    input.addEventListener("input", () => {
+      birthtimeGroup.dataset.explicit = "true";
+      sanitizeTimeSegment(input);
+      syncBirthtimeGroupValue();
+
+      if (input.value.length === 2 && segments[index + 1]) {
+        segments[index + 1].focus();
+        segments[index + 1].select();
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      if (input.value.length === 1) {
+        input.value = pad2(input.value);
+      }
+
+      if (segments.every((segment) => !segment.value)) {
+        setBirthtimeUnknownDisplay();
+        return;
+      }
+
+      syncBirthtimeGroupValue();
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Backspace" && !input.value && segments[index - 1]) {
+        segments[index - 1].focus();
+        segments[index - 1].setSelectionRange(
+          segments[index - 1].value.length,
+          segments[index - 1].value.length
+        );
+      }
+    });
+  });
+}
+
+function setReadonlyTimeGroupValue(group, timeString) {
+  const parts = parseTimeParts(timeString);
+
+  if (!parts) {
+    return;
+  }
+
+  group.hiddenInput.value = `${pad2(parts.hour)}:${pad2(parts.minute)}`;
+  setTimeGroupDisplay(group, pad2(parts.hour), pad2(parts.minute));
+  clearTimeGroupError(group, group.emptyHint);
+}
+
+function syncLiveTargetMoment(forceDate = false) {
+  const moment = getCurrentMomentStrings();
+
+  if ((forceDate || !targetDateIsManual) && targetDateInput.value !== moment.date) {
+    setDateGroupValue(targetDateDatePartsGroup, moment.date);
+  }
+
+  if (targetTimeInput.value !== moment.time) {
+    setReadonlyTimeGroupValue(targetTimePartsGroup, moment.time);
+  }
+}
+
+function startLiveTargetMomentClock() {
+  syncLiveTargetMoment(true);
+  liveTargetMomentTimer = window.setInterval(() => {
+    syncLiveTargetMoment(false);
+  }, 1000);
+}
+
 function inferZodiac(dateString) {
   if (!dateString) {
     return "";
@@ -709,17 +939,21 @@ function bandOf(score) {
   return "low";
 }
 
-function calcBaseContext(birthdate, zodiac, targetDate) {
+function calcBaseContext(birthdate, zodiac, targetDate, birthtime = "", targetTime = "00:00") {
   const birthDay = requireValidDate(birthdate).parsed;
   const targetDay = requireValidDate(targetDate).parsed;
+  const birthTimeParts = birthtime ? requireValidTime(birthtime) : null;
+  const targetTimeParts = requireValidTime(targetTime);
   const zodiacIndex = zodiacs.indexOf(zodiac);
 
-  const birthRhythm = ((birthDay.getFullYear() % 100) + (birthDay.getMonth() + 1) * 2 + birthDay.getDate()) % 19;
-  const dayRhythm = (((targetDay.getMonth() + 1) * 3) + targetDay.getDate() + targetDay.getDay() * 4) % 19;
-  const zodiacHarmony = ((zodiacIndex + 1) * 7 + targetDay.getDate() * 3 + targetDay.getDay() * 2) % 19;
+  const birthTimeWeight = birthTimeParts ? birthTimeParts.hour + Math.floor(birthTimeParts.minute / 10) : 0;
+  const targetTimeWeight = targetTimeParts.hour + Math.floor(targetTimeParts.minute / 10);
+  const birthRhythm = ((birthDay.getFullYear() % 100) + (birthDay.getMonth() + 1) * 2 + birthDay.getDate() + birthTimeWeight) % 19;
+  const dayRhythm = (((targetDay.getMonth() + 1) * 3) + targetDay.getDate() + targetDay.getDay() * 4 + targetTimeWeight) % 19;
+  const zodiacHarmony = ((zodiacIndex + 1) * 7 + targetDay.getDate() * 3 + targetDay.getDay() * 2 + targetTimeParts.hour) % 19;
 
-  const baseSeed = hashString(`${birthdate}|${zodiac}|${targetDate}`);
-  const oracleSeed = hashString(`${birthdate}|${zodiac}|${targetDate}|oracle`);
+  const baseSeed = hashString(`${birthdate}|${birthtime || "--:--"}|${zodiac}|${targetDate}|${targetTime}`);
+  const oracleSeed = hashString(`${birthdate}|${birthtime || "--:--"}|${zodiac}|${targetDate}|${targetTime}|oracle`);
   const oracleRng = createRng(oracleSeed);
 
   const tarotIndex = Math.floor(oracleRng() * tarotDeck.length);
@@ -886,10 +1120,12 @@ function resolveDominantCategory(metrics) {
 
 function buildMetricsPreview() {
   const birthdate = birthdateInput.value.trim();
+  const birthtime = birthtimeInput.value.trim();
   const zodiac = zodiacInput.value;
   const targetDate = targetDateInput.value.trim();
+  const targetTime = targetTimeInput.value.trim();
 
-  if (!birthdate || !zodiac || !targetDate) {
+  if (!birthdate || !zodiac || !targetDate || !targetTime) {
     return null;
   }
 
@@ -897,7 +1133,11 @@ function buildMetricsPreview() {
     return null;
   }
 
-  const context = calcBaseContext(birthdate, zodiac, targetDate);
+  if ((birthtime && !parseTimeParts(birthtime)) || !parseTimeParts(targetTime)) {
+    return null;
+  }
+
+  const context = calcBaseContext(birthdate, zodiac, targetDate, birthtime, targetTime);
   return {
     context,
     metrics: {
@@ -1042,7 +1282,7 @@ function buildEncouragement(focusInfo, decisionLevel) {
   return encouragements[decisionLevel][category];
 }
 
-function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus) {
+function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus, targetMomentLabel) {
   const relevantMetric = focusInfo.category === "overall" ? null : metrics[focusInfo.category];
   const relevantScore = relevantMetric ? relevantMetric.score : totalScore;
   const decisionScore = Math.round(relevantMetric ? mean([totalScore, relevantScore, relevantScore]) : totalScore);
@@ -1086,7 +1326,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
     guidance: encourageText,
     context: `这次把你的输入识别成一个具体问题，并优先参考${relevantLabel}位回答；换问题不会改动基础命盘，只会改变解读角度。`,
     summary: verdict,
-    title: `${resolveSummary(totalScore).title} · 问题占断`,
+    title: `${resolveSummary(totalScore).title} · ${targetMomentLabel}问题占断`,
     action: pick(createRng(hashString(`${rawFocus}|action|${decisionLevel}`)), actionPools[focusInfo.category] || generalActions),
     aiState: "pending",
     aiNote: "AI 正在结合这张固定命盘细化回答，基础分数、塔罗与卦象不会被改动。"
@@ -1097,8 +1337,10 @@ function buildAiPayload(formData, result) {
   return {
     nickname: formData.get("nickname")?.trim() || "你",
     birthdate: formData.get("birthdate")?.trim(),
+    birthtime: formData.get("birthtime")?.trim() || "",
     zodiac: formData.get("zodiac"),
     targetDate: formData.get("target-date")?.trim(),
+    targetTime: formData.get("target-time")?.trim(),
     question: formData.get("focus")?.trim() || "",
     totalScore: result.totalScore,
     title: result.title,
@@ -1259,12 +1501,15 @@ function renderResult(result) {
 function generateDivination(formData) {
   const nickname = formData.get("nickname")?.trim() || "你";
   const birthdate = formData.get("birthdate")?.trim();
+  const birthtime = formData.get("birthtime")?.trim() || "";
   const zodiac = formData.get("zodiac");
   const targetDate = formData.get("target-date")?.trim();
+  const targetTime = formData.get("target-time")?.trim();
   const rawFocus = formData.get("focus")?.trim() || "";
   const focusInfo = resolveFocusInfo(rawFocus);
+  const targetMomentLabel = buildTargetMomentLabel(targetDate, targetTime);
 
-  const context = calcBaseContext(birthdate, zodiac, targetDate);
+  const context = calcBaseContext(birthdate, zodiac, targetDate, birthtime, targetTime);
   const tarotCard = tarotDeck[context.tarotIndex];
   const tarot = {
     name: tarotCard.name,
@@ -1304,7 +1549,7 @@ function generateDivination(formData) {
     return {
       ...baseResult,
       mode: "general",
-      title: `${summary.title} · ${nickname}的${targetDate}命盘`,
+      title: `${summary.title} · ${nickname}的${targetMomentLabel}命盘`,
       summary: buildGeneralSummary(summary, metrics),
       context: buildGeneralContext(),
       dailyAction: pick(createRng(hashString(`${context.baseSeed}|general-action`)), generalActions),
@@ -1312,7 +1557,7 @@ function generateDivination(formData) {
     };
   }
 
-  const question = buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus);
+  const question = buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus, targetMomentLabel);
 
   return {
     ...baseResult,
@@ -1327,9 +1572,8 @@ function generateDivination(formData) {
 }
 
 function setToday() {
-  const today = new Date();
-  const localDate = `${today.getFullYear()}/${pad2(today.getMonth() + 1)}/${pad2(today.getDate())}`;
-  setDateGroupValue(targetDateDatePartsGroup, localDate);
+  const moment = getCurrentMomentStrings();
+  setDateGroupValue(targetDateDatePartsGroup, moment.date);
 }
 
 function resetQuestionDraft() {
@@ -1342,15 +1586,17 @@ function resetQuestionDraft() {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  syncLiveTargetMoment(false);
   refreshBirthdateDerivedState();
+  syncBirthtimeGroupValue();
   syncDateGroupValue(targetDateDatePartsGroup);
-  if (!validateDateGroup(birthdateDatePartsGroup) || !validateDateGroup(targetDateDatePartsGroup)) {
+  if (!validateDateGroup(birthdateDatePartsGroup) || !validateBirthtimeGroup() || !validateDateGroup(targetDateDatePartsGroup)) {
     return;
   }
   const formData = new FormData(form);
   const result = generateDivination(formData);
   renderResult(result);
-  updateFocusExample({ context: { baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("zodiac")}|${formData.get("target-date")}`) }, metrics: result.metrics });
+  updateFocusExample({ context: { baseSeed: hashString(`${formData.get("birthdate")}|${formData.get("birthtime") || "--:--"}|${formData.get("zodiac")}|${formData.get("target-date")}|${formData.get("target-time")}`) }, metrics: result.metrics });
 
   if (result.mode !== "question") {
     return;
@@ -1386,8 +1632,11 @@ function refreshBirthdateDerivedState() {
 }
 
 setupDateGroup(birthdateDatePartsGroup);
+setupBirthtimeGroup();
 setupDateGroup(targetDateDatePartsGroup);
 setToday();
+setBirthtimeUnknownDisplay();
+startLiveTargetMomentClock();
 syncDateGroupValue(targetDateDatePartsGroup);
 refreshBirthdateDerivedState();
 updateFocusExample();
@@ -1399,8 +1648,16 @@ nicknameInput.addEventListener("input", resetQuestionDraft);
   input.addEventListener("blur", refreshBirthdateDerivedState);
 });
 
-[targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
+[birthtimeHourInput, birthtimeMinuteInput].forEach((input) => {
   input.addEventListener("input", resetQuestionDraft);
+  input.addEventListener("blur", updateFocusExample);
+});
+
+[targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
+  input.addEventListener("input", () => {
+    targetDateIsManual = true;
+    resetQuestionDraft();
+  });
   input.addEventListener("blur", updateFocusExample);
 });
 focusExampleAction.addEventListener("click", () => {

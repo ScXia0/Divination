@@ -133,6 +133,38 @@
               </label>
 
               <label>
+                <span>出生时刻</span>
+                <div class="time-group" id="birthtime-group">
+                  <input type="hidden" id="birthtime" name="birthtime" />
+                  <div class="time-cell">
+                    <input
+                      type="text"
+                      id="birthtime-hour"
+                      class="time-segment"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="00"
+                      aria-label="出生小时"
+                    />
+                    <span class="time-divider">时</span>
+                  </div>
+                  <div class="time-cell">
+                    <input
+                      type="text"
+                      id="birthtime-minute"
+                      class="time-segment"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="00"
+                      aria-label="出生分钟"
+                    />
+                    <span class="time-divider">分</span>
+                  </div>
+                </div>
+                <p class="date-hint" id="birthtime-hint">若记不清可保留 00:00 的参考显示；只有你主动填写后，才会计入命盘。</p>
+              </label>
+
+              <label>
                 <span>生肖</span>
                 <input
                   type="text"
@@ -186,6 +218,40 @@
                   </div>
                 </div>
                 <p class="date-hint" id="target-date-hint">打开页面后会自动带入今天的日期，你也可以手动改成别的日期。</p>
+              </label>
+
+              <label>
+                <span>占卜时刻</span>
+                <div class="time-group time-group-live" id="target-time-group">
+                  <input type="hidden" id="target-time" name="target-time" required />
+                  <div class="time-cell">
+                    <input
+                      type="text"
+                      id="target-time-hour"
+                      class="time-segment"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="13"
+                      aria-label="占卜小时"
+                      readonly
+                    />
+                    <span class="time-divider">时</span>
+                  </div>
+                  <div class="time-cell">
+                    <input
+                      type="text"
+                      id="target-time-minute"
+                      class="time-segment"
+                      inputmode="numeric"
+                      maxlength="2"
+                      placeholder="15"
+                      aria-label="占卜分钟"
+                      readonly
+                    />
+                    <span class="time-divider">分</span>
+                  </div>
+                </div>
+                <p class="date-hint" id="target-time-hint">占卜时刻会默认显示当前时间，并在你停留页面期间持续刷新。</p>
               </label>
 
               <label>

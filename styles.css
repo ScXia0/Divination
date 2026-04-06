@@ -478,9 +478,9 @@ textarea {
   line-height: 1.8;
 }
 
-.date-group {
+.date-group,
+.time-group {
   display: grid;
-  grid-template-columns: 1.26fr 1fr 1fr;
   gap: 10px;
   padding: 10px;
   border-radius: 24px;
@@ -488,12 +488,22 @@ textarea {
   background: linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
 }
 
-.date-group.is-invalid {
+.date-group {
+  grid-template-columns: 1.26fr 1fr 1fr;
+}
+
+.time-group {
+  grid-template-columns: 1fr 1fr;
+}
+
+.date-group.is-invalid,
+.time-group.is-invalid {
   border-color: rgba(222, 108, 111, 0.54);
   box-shadow: 0 0 0 4px rgba(222, 108, 111, 0.1);
 }
 
-.date-cell {
+.date-cell,
+.time-cell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 48px;
   min-width: 0;
@@ -508,7 +518,8 @@ textarea {
   grid-template-columns: minmax(0, 1fr) 54px;
 }
 
-.date-segment {
+.date-segment,
+.time-segment {
   min-height: 100%;
   min-width: 0;
   padding: 0 8px;
@@ -525,7 +536,13 @@ textarea {
   -webkit-text-fill-color: var(--ink);
 }
 
-.date-divider {
+.time-group-live .time-segment[readonly] {
+  color: var(--gold-soft);
+  cursor: default;
+}
+
+.date-divider,
+.time-divider {
   display: grid;
   place-items: center;
   border-left: 1px solid rgba(212, 176, 118, 0.12);
@@ -902,13 +919,22 @@ textarea {
     font-size: 1rem;
   }
 
-  .date-group {
-    grid-template-columns: 1.22fr 1fr 1fr;
+  .date-group,
+  .time-group {
     gap: 8px;
     padding: 8px;
   }
 
-  .date-cell {
+  .date-group {
+    grid-template-columns: 1.22fr 1fr 1fr;
+  }
+
+  .time-group {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .date-cell,
+  .time-cell {
     grid-template-columns: minmax(0, 1fr) 42px;
     min-height: 58px;
   }
@@ -918,12 +944,14 @@ textarea {
     min-height: 58px;
   }
 
-  .date-divider {
+  .date-divider,
+  .time-divider {
     font-size: 0.9rem;
     letter-spacing: 0.06em;
   }
 
-  .date-segment {
+  .date-segment,
+  .time-segment {
     font-size: 0.96rem;
     padding: 0 6px;
   }
@@ -955,13 +983,22 @@ textarea {
     padding: 16px;
   }
 
-  .date-group {
-    grid-template-columns: 1.18fr 1fr 1fr;
+  .date-group,
+  .time-group {
     gap: 6px;
     padding: 6px;
   }
 
-  .date-cell {
+  .date-group {
+    grid-template-columns: 1.18fr 1fr 1fr;
+  }
+
+  .time-group {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .date-cell,
+  .time-cell {
     grid-template-columns: minmax(0, 1fr) 38px;
   }
 
