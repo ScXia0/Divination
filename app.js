@@ -569,6 +569,9 @@ function clampDateGroupValues(group) {
 }
 
 function syncDateGroupValue(group) {
+  sanitizeDateSegment(group.yearInput, 4);
+  sanitizeDateSegment(group.monthInput, 2);
+  sanitizeDateSegment(group.dayInput, 2);
   clampDateGroupValues(group);
 
   const year = group.yearInput.value;
@@ -1357,23 +1360,22 @@ form.addEventListener("submit", async (event) => {
 });
 
 function refreshBirthdateDerivedState() {
-  const inferred = inferZodiac(birthdateInput.value);
-  if (inferred) {
-    zodiacInput.value = inferred;
-  }
+  const isValid = syncDateGroupValue(birthdateDatePartsGroup);
+  zodiacInput.value = isValid ? inferZodiac(birthdateInput.value) : "";
   updateFocusExample();
 }
 
 setupDateGroup(birthdateDatePartsGroup);
 setupDateGroup(targetDateDatePartsGroup);
 setToday();
+syncDateGroupValue(targetDateDatePartsGroup);
+refreshBirthdateDerivedState();
 updateFocusExample();
 
 [birthdateYearInput, birthdateMonthInput, birthdateDayInput].forEach((input) => {
   input.addEventListener("blur", refreshBirthdateDerivedState);
 });
 
-zodiacInput.addEventListener("change", updateFocusExample);
 [targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
   input.addEventListener("blur", updateFocusExample);
 });

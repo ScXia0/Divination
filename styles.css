@@ -540,6 +540,14 @@ textarea {
   line-height: 1.7;
 }
 
+.auto-derived {
+  color: var(--gold-soft);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: default;
+  background: linear-gradient(180deg, rgba(250, 243, 231, 0.05), rgba(255, 255, 255, 0.03));
+}
+
 .date-hint.is-error {
   color: #ff9aa4;
 }
