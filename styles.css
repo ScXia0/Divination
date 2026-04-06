@@ -699,13 +699,20 @@ textarea {
 }
 
 .guide-card p {
-  margin-top: 10px;
-  line-height: 1.8;
+  margin-top: 12px;
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .guide-footnote {
   margin-top: 16px;
   font-size: 0.92rem;
+}
+
+.guide-panel .panel-head p:last-child {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.75;
 }
 
 .guide-actions {
@@ -717,7 +724,7 @@ textarea {
   display: grid;
   gap: 28px;
   margin-top: 18px;
-  min-height: 720px;
+  min-height: 1180px;
   padding: 34px;
   border-radius: 30px;
   border: 1px solid rgba(212, 176, 118, 0.14);
@@ -781,6 +788,12 @@ textarea {
   display: grid;
   grid-template-columns: 1.15fr 1fr 1fr;
   gap: 16px;
+}
+
+.empty-state-notes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .empty-state-card {
@@ -849,6 +862,59 @@ textarea {
   margin: 12px 0 0;
   color: var(--muted);
   line-height: 1.75;
+}
+
+.empty-state-note,
+.empty-state-ritual {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(212, 176, 118, 0.12);
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.06), transparent 30%),
+    linear-gradient(180deg, rgba(14, 23, 40, 0.96), rgba(9, 14, 26, 0.95));
+  box-shadow: var(--glow);
+}
+
+.empty-state-note {
+  min-height: 170px;
+  padding: 18px;
+}
+
+.empty-state-note span,
+.empty-state-ritual span {
+  display: block;
+  color: var(--gold-soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.empty-state-note strong,
+.empty-state-ritual strong {
+  display: block;
+  margin-top: 12px;
+  color: var(--ink);
+}
+
+.empty-state-note strong {
+  font-size: 1.28rem;
+}
+
+.empty-state-note p,
+.empty-state-ritual p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
+.empty-state-ritual {
+  padding: 22px 24px;
+}
+
+.empty-state-ritual strong {
+  font-size: 1.48rem;
+  line-height: 1.35;
 }
 
 .empty-tarot-stack {
@@ -1143,6 +1209,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .empty-state-notes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .hero-signals,
   .insight-grid,
   .metric-grid,
@@ -1190,6 +1260,10 @@ textarea {
 
   .guide-grid,
   .hero-signals {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state-notes {
     grid-template-columns: 1fr;
   }
 
