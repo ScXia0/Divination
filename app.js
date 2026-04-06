@@ -420,6 +420,34 @@ const focusInput = document.getElementById("focus");
 const focusExampleText = document.getElementById("focus-example-text");
 const focusExampleAction = document.getElementById("focus-example-action");
 const questionAiNote = document.getElementById("question-ai-note");
+const birthdateGroup = document.getElementById("birthdate-group");
+const birthdateYearInput = document.getElementById("birthdate-year");
+const birthdateMonthInput = document.getElementById("birthdate-month");
+const birthdateDayInput = document.getElementById("birthdate-day");
+const birthdateHint = document.getElementById("birthdate-hint");
+const targetDateGroup = document.getElementById("target-date-group");
+const targetDateYearInput = document.getElementById("target-date-year");
+const targetDateMonthInput = document.getElementById("target-date-month");
+const targetDateDayInput = document.getElementById("target-date-day");
+const targetDateHint = document.getElementById("target-date-hint");
+const birthdateDatePartsGroup = {
+  group: birthdateGroup,
+  hiddenInput: birthdateInput,
+  yearInput: birthdateYearInput,
+  monthInput: birthdateMonthInput,
+  dayInput: birthdateDayInput,
+  hint: birthdateHint,
+  emptyHint: "请输入 4 位年份，以及 2 位月份和日期。"
+};
+const targetDateDatePartsGroup = {
+  group: targetDateGroup,
+  hiddenInput: targetDateInput,
+  yearInput: targetDateYearInput,
+  monthInput: targetDateMonthInput,
+  dayInput: targetDateDayInput,
+  hint: targetDateHint,
+  emptyHint: "默认填入今天，也可以手动改成别的日期。"
+};
 let latestQuestionRequestId = 0;
 
 function hashString(input) {
@@ -471,23 +499,6 @@ function pad2(value) {
   return String(value).padStart(2, "0");
 }
 
-function formatDateInput(rawValue) {
-  const digits = rawValue.replace(/\D/g, "").slice(0, 8);
-  const year = digits.slice(0, 4);
-  const month = digits.slice(4, 6);
-  const day = digits.slice(6, 8);
-
-  if (digits.length <= 4) {
-    return year;
-  }
-
-  if (digits.length <= 6) {
-    return `${year}/${month}`;
-  }
-
-  return `${year}/${month}/${day}`;
-}
-
 function parseDateParts(dateString) {
   const match = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dateString.trim());
 
@@ -516,6 +527,10 @@ function parseDateParts(dateString) {
   return { year, month, day, parsed };
 }
 
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
 function requireValidDate(dateString) {
   const parts = parseDateParts(dateString);
 
@@ -526,32 +541,138 @@ function requireValidDate(dateString) {
   return parts;
 }
 
-function syncDateValidity(input) {
-  const value = input.value.trim();
+function sanitizeDateSegment(input, maxLength) {
+  input.value = input.value.replace(/\D/g, "").slice(0, maxLength);
+}
 
-  if (!value) {
-    input.setCustomValidity("请输入日期，格式为 YYYY/MM/DD。");
+function clampDateGroupValues(group) {
+  const year = group.yearInput.value;
+  let month = group.monthInput.value;
+  let day = group.dayInput.value;
+
+  if (month.length === 2) {
+    const monthNumber = Math.min(12, Math.max(1, Number(month)));
+    month = pad2(monthNumber);
+    group.monthInput.value = month;
+  }
+
+  if (day.length === 2) {
+    let maxDay = 31;
+    if (year.length === 4 && month.length === 2) {
+      maxDay = getDaysInMonth(Number(year), Number(month));
+    }
+    const dayNumber = Math.min(maxDay, Math.max(1, Number(day)));
+    day = pad2(dayNumber);
+    group.dayInput.value = day;
+  }
+}
+
+function syncDateGroupValue(group) {
+  clampDateGroupValues(group);
+
+  const year = group.yearInput.value;
+  const month = group.monthInput.value;
+  const day = group.dayInput.value;
+  const composed = year.length === 4 && month.length === 2 && day.length === 2
+    ? `${year}/${month}/${day}`
+    : "";
+
+  group.hiddenInput.value = composed;
+
+  if (!year && !month && !day) {
+    group.hiddenInput.value = "";
+    group.group.classList.remove("is-invalid");
+    group.hint.classList.remove("is-error");
+    if (group.emptyHint) {
+      group.hint.textContent = group.emptyHint;
+    }
     return false;
   }
 
-  if (!parseDateParts(value)) {
-    input.setCustomValidity("请输入有效日期，格式为 YYYY/MM/DD。");
+  if (!parseDateParts(composed)) {
+    group.group.classList.add("is-invalid");
+    group.hint.classList.add("is-error");
+    group.hint.textContent = "请输入有效日期，并确认月份在 01-12、日期在当月范围内。";
     return false;
   }
 
-  input.setCustomValidity("");
+  group.group.classList.remove("is-invalid");
+  group.hint.classList.remove("is-error");
+  if (group.emptyHint) {
+    group.hint.textContent = group.emptyHint;
+  }
   return true;
 }
 
-function bindDateInput(input) {
-  input.addEventListener("input", () => {
-    input.value = formatDateInput(input.value);
-    syncDateValidity(input);
-  });
+function validateDateGroup(group) {
+  const isValid = syncDateGroupValue(group);
+  if (isValid) {
+    return true;
+  }
 
-  input.addEventListener("blur", () => {
-    input.value = formatDateInput(input.value);
-    syncDateValidity(input);
+  if (!group.yearInput.value) {
+    group.yearInput.focus();
+  } else if (!group.monthInput.value) {
+    group.monthInput.focus();
+  } else {
+    group.dayInput.focus();
+  }
+
+  return false;
+}
+
+function setDateGroupValue(group, dateString) {
+  const parts = parseDateParts(dateString);
+
+  if (!parts) {
+    group.yearInput.value = "";
+    group.monthInput.value = "";
+    group.dayInput.value = "";
+    group.hiddenInput.value = "";
+    syncDateGroupValue(group);
+    return;
+  }
+
+  group.yearInput.value = String(parts.year);
+  group.monthInput.value = pad2(parts.month);
+  group.dayInput.value = pad2(parts.day);
+  syncDateGroupValue(group);
+}
+
+function setupDateGroup(group) {
+  const segments = [group.yearInput, group.monthInput, group.dayInput];
+  const lengths = [4, 2, 2];
+
+  segments.forEach((input, index) => {
+    input.addEventListener("input", () => {
+      sanitizeDateSegment(input, lengths[index]);
+      syncDateGroupValue(group);
+
+      if (input.value.length === lengths[index] && segments[index + 1]) {
+        segments[index + 1].focus();
+        segments[index + 1].select();
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      if (input === group.monthInput && input.value.length === 1) {
+        input.value = pad2(input.value);
+      }
+      if (input === group.dayInput && input.value.length === 1) {
+        input.value = pad2(input.value);
+      }
+      syncDateGroupValue(group);
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Backspace" && !input.value && segments[index - 1]) {
+        segments[index - 1].focus();
+        segments[index - 1].setSelectionRange(
+          segments[index - 1].value.length,
+          segments[index - 1].value.length
+        );
+      }
+    });
   });
 }
 
@@ -1139,14 +1260,12 @@ function generateDivination(formData) {
 function setToday() {
   const today = new Date();
   const localDate = `${today.getFullYear()}/${pad2(today.getMonth() + 1)}/${pad2(today.getDate())}`;
-  document.getElementById("target-date").value = localDate;
-  syncDateValidity(targetDateInput);
+  setDateGroupValue(targetDateDatePartsGroup, localDate);
 }
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!syncDateValidity(birthdateInput) || !syncDateValidity(targetDateInput)) {
-    form.reportValidity();
+  if (!validateDateGroup(birthdateDatePartsGroup) || !validateDateGroup(targetDateDatePartsGroup)) {
     return;
   }
   const formData = new FormData(form);
@@ -1177,21 +1296,27 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-bindDateInput(birthdateInput);
-bindDateInput(targetDateInput);
-setToday();
-updateFocusExample();
-
-birthdateInput.addEventListener("change", () => {
+function refreshBirthdateDerivedState() {
   const inferred = inferZodiac(birthdateInput.value);
   if (inferred) {
     zodiacInput.value = inferred;
   }
   updateFocusExample();
+}
+
+setupDateGroup(birthdateDatePartsGroup);
+setupDateGroup(targetDateDatePartsGroup);
+setToday();
+updateFocusExample();
+
+[birthdateYearInput, birthdateMonthInput, birthdateDayInput].forEach((input) => {
+  input.addEventListener("blur", refreshBirthdateDerivedState);
 });
 
 zodiacInput.addEventListener("change", updateFocusExample);
-targetDateInput.addEventListener("change", updateFocusExample);
+[targetDateYearInput, targetDateMonthInput, targetDateDayInput].forEach((input) => {
+  input.addEventListener("blur", updateFocusExample);
+});
 focusExampleAction.addEventListener("click", () => {
   const example = focusExampleAction.dataset.example;
   if (example) {

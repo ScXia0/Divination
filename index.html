@@ -61,16 +61,43 @@
 
             <label>
               <span>生日</span>
-              <input
-                type="text"
-                id="birthdate"
-                name="birthdate"
-                inputmode="numeric"
-                autocomplete="bday"
-                maxlength="10"
-                placeholder="YYYY/MM/DD"
-                required
-              />
+              <div class="date-group" id="birthdate-group" data-date-group="birthdate">
+                <input type="hidden" id="birthdate" name="birthdate" required />
+                <input
+                  type="text"
+                  id="birthdate-year"
+                  class="date-segment date-year"
+                  inputmode="numeric"
+                  autocomplete="bday-year"
+                  maxlength="4"
+                  placeholder="1997"
+                  aria-label="出生年份"
+                />
+                <span class="date-divider">年</span>
+                <input
+                  type="text"
+                  id="birthdate-month"
+                  class="date-segment date-month"
+                  inputmode="numeric"
+                  autocomplete="bday-month"
+                  maxlength="2"
+                  placeholder="08"
+                  aria-label="出生月份"
+                />
+                <span class="date-divider">月</span>
+                <input
+                  type="text"
+                  id="birthdate-day"
+                  class="date-segment date-day"
+                  inputmode="numeric"
+                  autocomplete="bday-day"
+                  maxlength="2"
+                  placeholder="09"
+                  aria-label="出生日期"
+                />
+                <span class="date-divider">日</span>
+              </div>
+              <p class="date-hint" id="birthdate-hint">请输入 4 位年份，以及 2 位月份和日期。</p>
             </label>
 
             <label>
@@ -94,15 +121,40 @@
 
             <label>
               <span>占卜日期</span>
-              <input
-                type="text"
-                id="target-date"
-                name="target-date"
-                inputmode="numeric"
-                maxlength="10"
-                placeholder="YYYY/MM/DD"
-                required
-              />
+              <div class="date-group" id="target-date-group" data-date-group="target-date">
+                <input type="hidden" id="target-date" name="target-date" required />
+                <input
+                  type="text"
+                  id="target-date-year"
+                  class="date-segment date-year"
+                  inputmode="numeric"
+                  maxlength="4"
+                  placeholder="2026"
+                  aria-label="占卜年份"
+                />
+                <span class="date-divider">年</span>
+                <input
+                  type="text"
+                  id="target-date-month"
+                  class="date-segment date-month"
+                  inputmode="numeric"
+                  maxlength="2"
+                  placeholder="04"
+                  aria-label="占卜月份"
+                />
+                <span class="date-divider">月</span>
+                <input
+                  type="text"
+                  id="target-date-day"
+                  class="date-segment date-day"
+                  inputmode="numeric"
+                  maxlength="2"
+                  placeholder="06"
+                  aria-label="占卜日期"
+                />
+                <span class="date-divider">日</span>
+              </div>
+              <p class="date-hint" id="target-date-hint">默认填入今天，也可以手动改成别的日期。</p>
             </label>
 
             <label>
