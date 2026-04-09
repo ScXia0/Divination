@@ -325,6 +325,51 @@ const questionRules = [
   }
 ];
 
+const focusReasonProfiles = {
+  confession: {
+    focus: "表达时机和关系温度",
+    go: "今天的底盘更支持把心意说明白，但重点在真诚表达，不在一步到位。",
+    maybe: "今天不是不能说，而是更适合先把气氛养热，再决定要不要把话说满。",
+    wait: "今天的底盘更像提醒你先稳住关系温度，别急着把答案逼出来。"
+  },
+  relationship: {
+    focus: "互动温度和回应空间",
+    go: "今天更适合主动靠近，但方式越自然，回应越容易变好。",
+    maybe: "今天适合先恢复交流感，别急着一下子把关系推进到结果层。",
+    wait: "今天更适合先沉淀情绪，给彼此一点空间，关系反而更容易回温。"
+  },
+  careerAction: {
+    focus: "准备度、时机和沟通清晰度",
+    go: "今天的底盘支持你推进这件事，前提是目标和说法都已经理顺。",
+    maybe: "今天更像适合铺垫和试探，先把信息对齐，再决定要不要发力。",
+    wait: "今天的底盘不支持硬推，先补信息、补方案，会比现在直接冲更稳。"
+  },
+  moneyAction: {
+    focus: "现实边界、细节和风险感",
+    go: "今天可以动这笔决定，但更看细节是否确认到位，而不是一时上头。",
+    maybe: "今天适合先算清楚，再决定要不要花、要不要投。",
+    wait: "今天的底盘更偏保守，先把风险和边界看明白，比立刻拍板更重要。"
+  },
+  dailyActivity: {
+    focus: "当天状态、松弛感和安排余量",
+    go: "今天有余量去做这件事，重点是轻松安排，不要把放松又做成任务。",
+    maybe: "今天不是不能去，而是更适合留弹性，看状态决定做到几分。",
+    wait: "今天更适合先顾状态，别把计划排得太死，顺一点再去会更舒服。"
+  },
+  energyAction: {
+    focus: "身体余量和恢复节奏",
+    go: "今天适合把恢复和规律放进优先级，状态一稳，很多事都会顺。",
+    maybe: "今天更适合保住节奏，不适合再额外加码消耗自己。",
+    wait: "今天更像在提醒你先休整，别把疲惫继续往后拖。"
+  },
+  overallQuestion: {
+    focus: "整体节奏和取舍判断",
+    go: "今天整体底盘支持你推进，但越按节奏来，越容易把好运接住。",
+    maybe: "今天更适合先准备再行动，不必急着把答案一次做绝。",
+    wait: "今天先缓一缓更稳，等自己和局面都顺一点，再决定也不晚。"
+  }
+};
+
 const generalActions = [
   "把最重要的一件事提前到上午完成",
   "给正在推进的事情多预留半小时缓冲",
@@ -510,6 +555,49 @@ function setAskModuleVisible(isVisible) {
 function setAskSubmitLoading(isLoading) {
   askSubmitButton.disabled = isLoading;
   askSubmitButton.textContent = isLoading ? "正在生成解答..." : defaultAskSubmitLabel;
+}
+
+function buildKeywordMatchScore(rawText, keyword) {
+  if (!rawText.includes(keyword)) {
+    return 0;
+  }
+
+  const compactText = rawText.replace(/\s+/g, "");
+  const compactKeyword = keyword.replace(/\s+/g, "");
+  const lengthScore = Math.min(compactKeyword.length, 6);
+  const phraseBonus = compactKeyword.length >= 3 ? 2 : 1;
+  const startBonus = compactText.startsWith(compactKeyword) ? 1 : 0;
+  return lengthScore + phraseBonus + startBonus;
+}
+
+function resolveFocusMatches(rawFocus) {
+  const trimmed = rawFocus.trim();
+
+  return questionRules
+    .map((rule) => {
+      const matchedKeywords = rule.keywords.filter((keyword) => trimmed.includes(keyword));
+
+      if (!matchedKeywords.length) {
+        return null;
+      }
+
+      const score = matchedKeywords.reduce((sum, keyword) => sum + buildKeywordMatchScore(trimmed, keyword), 0)
+        + Math.max(matchedKeywords.length - 1, 0);
+
+      return {
+        ...rule,
+        matchedKeywords,
+        score
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return right.matchedKeywords.join("").length - left.matchedKeywords.join("").length;
+    });
 }
 
 function hashString(input) {
@@ -1077,11 +1165,13 @@ function resolveFocusInfo(rawFocus) {
       category: "overall",
       type: "overall",
       label: "整体运势",
-      raw: ""
+      raw: "",
+      matchedKeywords: []
     };
   }
 
-  const matchedRule = questionRules.find((rule) => rule.keywords.some((keyword) => trimmed.includes(keyword)));
+  const matchedRules = resolveFocusMatches(trimmed);
+  const matchedRule = matchedRules[0];
 
   if (matchedRule) {
     return {
@@ -1089,7 +1179,8 @@ function resolveFocusInfo(rawFocus) {
       category: matchedRule.category,
       type: matchedRule.type,
       label: metricDefinitions[matchedRule.category].label,
-      raw: trimmed
+      raw: trimmed,
+      matchedKeywords: matchedRule.matchedKeywords
     };
   }
 
@@ -1098,7 +1189,8 @@ function resolveFocusInfo(rawFocus) {
     category: "overall",
     type: "overallQuestion",
     label: "整体运势",
-    raw: trimmed
+    raw: trimmed,
+    matchedKeywords: []
   };
 }
 
@@ -1317,6 +1409,70 @@ function resolveDailyActivityDetail(rawFocus) {
   };
 }
 
+function buildQuestionFocusReason(focusInfo, decisionLevel, rawFocus) {
+  const profile = focusReasonProfiles[focusInfo.type] || focusReasonProfiles.overallQuestion;
+
+  if (focusInfo.type === "dailyActivity") {
+    const detail = resolveDailyActivityDetail(rawFocus);
+    return `如果把问题落回“${detail.noun}”本身，这件事更看${detail.focus}。${profile[decisionLevel]}`;
+  }
+
+  const keywordHint = focusInfo.matchedKeywords?.length
+    ? `你这次问到的重点像“${focusInfo.matchedKeywords[0]}”这类动作，`
+    : "";
+
+  return `${keywordHint}这件事更看${profile.focus}。${profile[decisionLevel]}`;
+}
+
+function buildQuestionSymbolReason(focusInfo, decisionLevel, tarot, hexagram, rawFocus) {
+  if (focusInfo.type === "dailyActivity") {
+    const detail = resolveDailyActivityDetail(rawFocus);
+    const direction = decisionLevel === "go"
+      ? `${detail.noun}顺势安排、轻松去做`
+      : decisionLevel === "maybe"
+        ? `${detail.noun}留出弹性，不必把强度和行程排满`
+        : `先顾状态，别急着把${detail.noun}硬塞进今天`;
+
+    return `塔罗「${tarot.name}」${tarot.orientation}和卦象「${hexagram.name}」的组合，也更偏向${direction}。`;
+  }
+
+  const directionMap = {
+    confession: {
+      go: "真诚表达",
+      maybe: "先升温再推进",
+      wait: "先观察再表态"
+    },
+    relationship: {
+      go: "自然靠近",
+      maybe: "先恢复交流感",
+      wait: "先给关系留空间"
+    },
+    careerAction: {
+      go: "准备好后主动推进",
+      maybe: "先铺垫节奏与信息",
+      wait: "先补准备，别硬推"
+    },
+    moneyAction: {
+      go: "确认清楚后再动作",
+      maybe: "先算明白再决定",
+      wait: "先按住冲动"
+    },
+    energyAction: {
+      go: "优先稳住恢复节奏",
+      maybe: "给自己留余量",
+      wait: "先停下来修整"
+    },
+    overallQuestion: {
+      go: "顺着今天的底盘往前走",
+      maybe: "先铺垫再决定",
+      wait: "先缓一缓"
+    }
+  };
+
+  const typeMap = directionMap[focusInfo.type] || directionMap.overallQuestion;
+  return `塔罗「${tarot.name}」${tarot.orientation}和卦象「${hexagram.name}」的组合，也更支持你${typeMap[decisionLevel]}。`;
+}
+
 function buildPreparation(focusInfo, decisionLevel) {
   const preparations = {
     confession: {
@@ -1400,15 +1556,11 @@ function buildEncouragement(focusInfo, decisionLevel) {
   return encouragements[decisionLevel][category];
 }
 
-function buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore, tarot, hexagram) {
-  const basis = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。塔罗「${tarot.name}」${tarot.orientation}提示“${tarot.message}”，卦象「${hexagram.name}」则提醒“${hexagram.text}”。`;
-
-  if (focusInfo.type === "dailyActivity") {
-    const detail = resolveDailyActivityDetail(focusInfo.raw);
-    return `${basis} 如果你问的是${detail.noun}，这件事更看${detail.focus}。所以重点不是抽象地问“能不能”，而是今天适不适合轻松去、别把自己排得太满。`;
-  }
-
-  return `${basis} 综合来看，这件事更适合按照今天的节奏来处理。`;
+function buildQuestionReason(focusInfo, decisionLevel, totalScore, relevantLabel, relevantScore, tarot, hexagram, rawFocus) {
+  const basis = `从基础命盘看，今日总运为 ${totalScore} 分，${relevantLabel}位为 ${relevantScore} 分，整体气场${bandText(totalScore)}。`;
+  const focusReason = buildQuestionFocusReason(focusInfo, decisionLevel, rawFocus);
+  const symbolReason = buildQuestionSymbolReason(focusInfo, decisionLevel, tarot, hexagram, rawFocus);
+  return `${basis} ${focusReason} ${symbolReason}`;
 }
 
 function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, rawFocus, targetMomentLabel) {
@@ -1427,7 +1579,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   const questionTitle = `关于“${rawFocus}”`;
   const dailyActivityDetail = focusInfo.type === "dailyActivity" ? resolveDailyActivityDetail(rawFocus) : null;
   const verdict = dailyActivityDetail ? dailyActivityDetail[decisionLevel] : buildVerdict(focusInfo, decisionLevel);
-  const reason = buildQuestionReason(focusInfo, totalScore, relevantLabel, relevantScore, tarot, hexagram);
+  const reason = buildQuestionReason(focusInfo, decisionLevel, totalScore, relevantLabel, relevantScore, tarot, hexagram, rawFocus);
   const relevantTitle = relevantMetric ? `主参考：${relevantLabel}位` : "主参考：整体命盘";
   const relevantText = relevantMetric
     ? `这次判断优先参考${relevantLabel}位，但也会同时结合今日总运 ${totalScore} 分、塔罗与卦象，不再重复展开四个固定模块。`
@@ -1742,8 +1894,9 @@ function setToday() {
 function resetQuestionDraft() {
   invalidateQuestionRequest();
   latestQuestionResult = null;
-  if (focusInput.value.trim()) {
-    focusInput.value = "";
+  setAskSubmitLoading(false);
+  if (latestGeneralResult) {
+    renderQuestionSection(null);
   }
   updateFocusExample();
 }
