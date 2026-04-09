@@ -476,10 +476,12 @@ const questionAiNote = document.getElementById("question-ai-note");
 const askModule = document.getElementById("ask-module");
 const askSubmitButton = document.getElementById("ask-submit-btn");
 const goAskButton = document.getElementById("go-ask-button");
+const drawFollowupButton = document.getElementById("draw-followup-button");
 const backToScoreButton = document.getElementById("back-to-score-button");
 const guideAskButton = document.getElementById("guide-ask-button");
 const headlineCard = document.getElementById("headline-card");
 const questionCard = document.getElementById("question-card");
+const followupCard = document.getElementById("followup-card");
 const birthdateGroup = document.getElementById("birthdate-group");
 const birthdateYearInput = document.getElementById("birthdate-year");
 const birthdateMonthInput = document.getElementById("birthdate-month");
@@ -542,6 +544,7 @@ let latestGeneralResult = null;
 let latestQuestionResult = null;
 let targetDateIsManual = false;
 let liveTargetMomentTimer = 0;
+let isFollowupCardVisible = false;
 const defaultAskSubmitLabel = "解读这个问题";
 
 function invalidateQuestionRequest() {
@@ -1249,6 +1252,77 @@ function buildInsightData(result) {
   };
 }
 
+function formatHourRange(startHour, duration = 2) {
+  const endHour = (startHour + duration) % 24;
+  return `${pad2(startHour)}:00 - ${pad2(endHour)}:00`;
+}
+
+function buildTodayCard(context, totalScore) {
+  const dailyRng = createRng(hashString(`${context.baseSeed}|today-card`));
+  const card = tarotDeck[Math.floor(dailyRng() * tarotDeck.length)];
+  const reversed = dailyRng() > 0.56;
+  const message = reversed ? card.reversed : card.upright;
+  const band = bandOf(totalScore);
+  const moodMap = {
+    high: {
+      label: "顺势展开日",
+      ritual: "把最想推进的一件事放到前面，你会更容易接住今天的流动感。"
+    },
+    mid: {
+      label: "稳步显化日",
+      ritual: "这张牌更适合拿来校准节奏，今天别求太快，求一步一步站稳。"
+    },
+    low: {
+      label: "收心蓄能日",
+      ritual: "先把状态照顾好，再看下一步。今天的好运不在猛冲，而在顺势留白。"
+    }
+  };
+  const mood = moodMap[band];
+
+  return {
+    name: `${card.name}${reversed ? " · 逆位" : " · 正位"}`,
+    seal: card.name,
+    orientation: reversed ? "逆位" : "正位",
+    message: stripEndingPunctuation(message),
+    ritual: mood.ritual,
+    mood: mood.label
+  };
+}
+
+function buildLuckyWindows(context, metrics, totalScore) {
+  const sorted = sortedMetricEntries(metrics);
+  const strongestLabel = metricDefinitions[sorted[0][0]].label;
+  const secondLabel = metricDefinitions[sorted[1][0]].label;
+  const softestLabel = metricDefinitions[sorted[sorted.length - 1][0]].label;
+  const windowRng = createRng(hashString(`${context.baseSeed}|lucky-windows`));
+  const pushStarts = [8, 9, 10, 11];
+  const socialStarts = [13, 14, 15, 16, 17];
+  const resetStarts = [19, 20, 21, 22];
+  const socialText = totalScore >= 74
+    ? `更适合聊事、发消息或约见面，把${secondLabel}位的流动感接起来。`
+    : totalScore >= 64
+      ? "更适合轻沟通和柔和推进，先把气氛聊顺，再谈重点。"
+      : "更适合只处理必要沟通，别把自己放进太高强度的社交里。";
+
+  return [
+    {
+      label: "顺势时段",
+      range: formatHourRange(pick(windowRng, pushStarts)),
+      text: `这段时间更适合处理${strongestLabel}相关事项，推进感会更顺一些。`
+    },
+    {
+      label: "会面时段",
+      range: formatHourRange(pick(windowRng, socialStarts)),
+      text: socialText
+    },
+    {
+      label: "收心时段",
+      range: formatHourRange(pick(windowRng, resetStarts)),
+      text: `这段时间更适合整理、收尾和放松，把${softestLabel}位的消耗降下来。`
+    }
+  ];
+}
+
 function resolveDominantCategory(metrics) {
   const sorted = Object.entries(metrics).sort((a, b) => b[1].score - a[1].score);
   return sorted[0]?.[0] || "overall";
@@ -1520,6 +1594,40 @@ function buildSceneEncouragement(scene, decisionLevel) {
   return `今天先不急着${scene.action}也没关系，给自己留一点余地，反而更容易接住后面的顺势。`;
 }
 
+function buildFollowupCard(focusInfo, rawFocus, decisionLevel, tarot, hexagram) {
+  const scene = resolveQuestionScene(rawFocus, focusInfo);
+  const followupRng = createRng(hashString(`${rawFocus}|${focusInfo.type}|${decisionLevel}|${tarot.name}|${hexagram.name}|followup-card`));
+  const card = tarotDeck[Math.floor(followupRng() * tarotDeck.length)];
+  const reversed = followupRng() > 0.58;
+  const cardMessage = reversed ? card.reversed : card.upright;
+  const insightTitleMap = {
+    go: "别把顺势用过头",
+    maybe: "先看回应再加码",
+    wait: "今天更要顾住自己"
+  };
+  const promptMap = {
+    go: `如果你已经准备开始“${scene.label}”，这张追问牌更像在提醒你别哪里太满。`,
+    maybe: `如果你还在犹豫“${scene.label}”，这张追问牌更像在提醒你先看哪个信号。`,
+    wait: `如果你暂时先不动“${scene.label}”，这张追问牌更像在提醒你把哪一步先稳住。`
+  };
+  const actionMap = {
+    go: `先把“${scene.label}”拆成一个小动作，今天先完成第一步就够了。`,
+    maybe: `先给“${scene.label}”留一个轻量试探口，不必一下子把结果问到底。`,
+    wait: `先别把“${scene.label}”往前硬推，先顾状态、节奏或边界，后面会更顺。`
+  };
+
+  return {
+    title: `${card.name} · ${reversed ? "逆位" : "正位"}`,
+    orientation: reversed ? "逆位" : "正位",
+    prompt: promptMap[decisionLevel],
+    message: stripEndingPunctuation(cardMessage),
+    insightTitle: insightTitleMap[decisionLevel],
+    insightText: `这张牌更像在提醒你：${stripEndingPunctuation(cardMessage)}。把它放回“${scene.label}”里看，重点不是立刻求结果，而是先把当下这一步处理顺。`,
+    actionTitle: decisionLevel === "wait" ? "先稳住" : "先做这一小步",
+    actionText: actionMap[decisionLevel]
+  };
+}
+
 function buildQuestionFocusReason(focusInfo, decisionLevel, rawFocus) {
   const profile = focusReasonProfiles[focusInfo.type] || focusReasonProfiles.overallQuestion;
   const scene = resolveQuestionScene(rawFocus, focusInfo);
@@ -1719,6 +1827,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
     : scene.generic
       ? buildEncouragement(focusInfo, decisionLevel)
       : buildSceneEncouragement(scene, decisionLevel);
+  const followUpCard = buildFollowupCard(focusInfo, rawFocus, decisionLevel, tarot, hexagram);
 
   return {
     relevantLabel,
@@ -1734,6 +1843,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
     prepText,
     encourageTitle: decisionLevel === "wait" ? "别急" : "放心去做",
     encourageText,
+    followUpCard,
     guidance: encourageText,
     context: `这次把你的输入识别成“${scene.label}”这类具体问题，并优先参考${relevantLabel}位回答；换问题不会改动基础命盘，只会改变解读角度。`,
     summary: verdict,
@@ -1863,6 +1973,45 @@ function scrollAskModuleIntoView() {
   });
 }
 
+function setFollowupCardVisible(isVisible) {
+  isFollowupCardVisible = isVisible;
+  followupCard.classList.toggle("hidden", !isVisible);
+  drawFollowupButton.textContent = isVisible ? "收起追问牌" : "抽一张追问牌";
+}
+
+function renderTodayCard(todayCard) {
+  document.getElementById("today-card-name").textContent = todayCard.name;
+  document.getElementById("today-card-orientation").textContent = todayCard.orientation;
+  document.getElementById("today-card-message").textContent = todayCard.message;
+  document.getElementById("today-card-ritual").textContent = todayCard.ritual;
+  document.getElementById("today-card-seal").textContent = todayCard.seal;
+  document.getElementById("today-card-mood").textContent = todayCard.mood;
+}
+
+function renderLuckyWindows(windows) {
+  const luckyTimeList = document.getElementById("lucky-time-list");
+  luckyTimeList.innerHTML = windows.map((window) => `
+    <article class="time-window-card">
+      <div class="time-window-top">
+        <span>${window.label}</span>
+        <strong>${window.range}</strong>
+      </div>
+      <p>${window.text}</p>
+    </article>
+  `).join("");
+}
+
+function renderFollowupCard(followUpCard) {
+  document.getElementById("followup-card-orientation").textContent = followUpCard.orientation;
+  document.getElementById("followup-card-title").textContent = followUpCard.title;
+  document.getElementById("followup-card-prompt").textContent = followUpCard.prompt;
+  document.getElementById("followup-card-message").textContent = followUpCard.message;
+  document.getElementById("followup-card-insight-title").textContent = followUpCard.insightTitle;
+  document.getElementById("followup-card-insight-text").textContent = followUpCard.insightText;
+  document.getElementById("followup-card-action-title").textContent = followUpCard.actionTitle;
+  document.getElementById("followup-card-action-text").textContent = followUpCard.actionText;
+}
+
 function renderQuestion(question) {
   document.getElementById("question-title").textContent = question.questionTitle;
   document.getElementById("question-verdict").textContent = question.verdict;
@@ -1877,6 +2026,7 @@ function renderQuestion(question) {
   document.getElementById("question-prep-text").textContent = question.prepText;
   document.getElementById("question-encourage-title").textContent = question.encourageTitle;
   document.getElementById("question-encourage-text").textContent = question.encourageText;
+  renderFollowupCard(question.followUpCard);
 }
 
 function renderBaseResult(result) {
@@ -1904,6 +2054,8 @@ function renderBaseResult(result) {
   document.getElementById("hexagram-name").textContent = result.hexagram.name;
   document.getElementById("hexagram-symbol").textContent = result.hexagram.symbol;
   document.getElementById("hexagram-message").textContent = result.hexagram.text;
+  renderTodayCard(result.todayCard);
+  renderLuckyWindows(result.luckyWindows);
 
   document.getElementById("lucky-color").textContent = result.luckyColor;
   document.getElementById("lucky-number").textContent = result.luckyNumber;
@@ -1915,12 +2067,15 @@ function renderBaseResult(result) {
 function renderQuestionSection(result) {
   questionView.classList.toggle("hidden", !result);
   backToScoreButton.classList.toggle("hidden", !result);
+  drawFollowupButton.classList.toggle("hidden", !result);
 
   if (!result) {
+    setFollowupCardVisible(false);
     return;
   }
 
   renderQuestion(result.question);
+  setFollowupCardVisible(isFollowupCardVisible);
 }
 
 function renderDashboard() {
@@ -1974,6 +2129,8 @@ function generateDivination(formData) {
     metrics,
     tarot,
     hexagram,
+    todayCard: buildTodayCard(context, totalScore),
+    luckyWindows: buildLuckyWindows(context, metrics, totalScore),
     luckyColor: pick(fortuneRng, colors),
     luckyNumber: String(1 + Math.floor(fortuneRng() * 9)),
     luckyDirection: pick(fortuneRng, directions)
@@ -2013,6 +2170,7 @@ function setToday() {
 function resetQuestionDraft() {
   invalidateQuestionRequest();
   latestQuestionResult = null;
+  isFollowupCardVisible = false;
   setAskSubmitLoading(false);
   if (latestGeneralResult) {
     renderQuestionSection(null);
@@ -2051,6 +2209,7 @@ form.addEventListener("submit", (event) => {
 
   invalidateQuestionRequest();
   setAskModuleVisible(false);
+  isFollowupCardVisible = false;
   setAskSubmitLoading(false);
   const formData = buildBaseFormData();
   const result = generateDivination(formData);
@@ -2084,6 +2243,7 @@ askSubmitButton.addEventListener("click", async () => {
   questionFormData.set("focus", rawQuestion);
   const result = generateDivination(questionFormData);
   latestQuestionResult = result;
+  isFollowupCardVisible = false;
   setAskSubmitLoading(true);
   renderDashboard();
   updateExampleFromFormData(questionFormData, result);
@@ -2169,6 +2329,20 @@ backToScoreButton.addEventListener("click", () => {
   }
 
   scrollScoreResultIntoView();
+});
+
+drawFollowupButton.addEventListener("click", () => {
+  if (!latestQuestionResult) {
+    return;
+  }
+
+  setFollowupCardVisible(!isFollowupCardVisible);
+
+  if (isFollowupCardVisible) {
+    requestAnimationFrame(() => {
+      followupCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 });
 
 focusExampleAction.addEventListener("click", () => {

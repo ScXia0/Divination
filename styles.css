@@ -183,7 +183,8 @@ p {
 .ritual-card,
 .oracle-card,
 .message-block,
-.question-card {
+.question-card,
+.followup-card {
   position: relative;
   overflow: hidden;
   border-radius: 22px;
@@ -197,7 +198,8 @@ p {
 .ritual-card,
 .oracle-card,
 .message-block,
-.question-card {
+.question-card,
+.followup-card {
   border: 1px solid rgba(212, 176, 118, 0.11);
   background: linear-gradient(180deg, rgba(14, 23, 40, 0.95), rgba(9, 15, 28, 0.94));
 }
@@ -1056,6 +1058,7 @@ textarea {
 .insight-grid,
 .metric-grid,
 .oracle-grid,
+.play-grid,
 .ritual-grid,
 .question-support-grid {
   display: grid;
@@ -1065,6 +1068,7 @@ textarea {
 .insight-grid,
 .metric-grid,
 .oracle-grid,
+.play-grid,
 .question-support-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1143,6 +1147,175 @@ textarea {
   margin-top: 10px;
 }
 
+.play-grid {
+  align-items: stretch;
+}
+
+.today-card-feature,
+.lucky-time-panel,
+.followup-card {
+  padding: 20px;
+}
+
+.today-card-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(180px, 0.9fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 250px;
+}
+
+.today-card-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.today-card-ritual {
+  color: var(--gold-soft);
+}
+
+.today-card-visual {
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+}
+
+.today-card-stack {
+  position: relative;
+  width: min(220px, 100%);
+  aspect-ratio: 0.72;
+}
+
+.today-card-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+}
+
+.today-card-shadow {
+  transform: rotate(-9deg) translate(-10px, 10px);
+  background: linear-gradient(180deg, rgba(91, 54, 70, 0.5), rgba(21, 16, 27, 0.18));
+  border: 1px solid rgba(143, 83, 102, 0.18);
+}
+
+.today-card-back {
+  transform: rotate(7deg);
+  background:
+    radial-gradient(circle at center, rgba(212, 176, 118, 0.1), transparent 56%),
+    linear-gradient(180deg, rgba(25, 34, 56, 0.96), rgba(13, 20, 37, 0.98));
+  border: 1px solid rgba(212, 176, 118, 0.18);
+}
+
+.today-card-front {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 22px;
+  text-align: center;
+  background:
+    radial-gradient(circle at top, rgba(212, 176, 118, 0.15), transparent 30%),
+    linear-gradient(180deg, rgba(16, 25, 43, 0.98), rgba(10, 15, 27, 0.98));
+  border: 1px solid rgba(212, 176, 118, 0.24);
+  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.36);
+}
+
+.today-card-front::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 176, 118, 0.16);
+}
+
+.today-card-front span {
+  position: relative;
+  z-index: 1;
+  color: var(--gold-soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.today-card-front strong {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  font-size: 1.9rem;
+  line-height: 1.15;
+}
+
+.today-card-front p {
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.lucky-time-panel h3 {
+  margin-bottom: 14px;
+}
+
+.lucky-time-list {
+  display: grid;
+  gap: 12px;
+}
+
+.time-window-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 176, 118, 0.12);
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(16, 25, 43, 0.9), rgba(11, 17, 30, 0.94));
+}
+
+.time-window-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.time-window-top span {
+  color: var(--gold-soft);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.time-window-top strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.followup-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(212, 176, 118, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(16, 25, 43, 0.97), rgba(9, 14, 26, 0.96));
+}
+
+.followup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.followup-prompt {
+  color: var(--gold-soft);
+}
+
+.followup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .question-verdict {
   color: var(--gold-soft);
   font-size: 1.05rem;
@@ -1217,8 +1390,10 @@ textarea {
   .insight-grid,
   .metric-grid,
   .oracle-grid,
+  .play-grid,
   .question-support-grid,
-  .ritual-grid {
+  .ritual-grid,
+  .followup-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1268,6 +1443,10 @@ textarea {
   }
 
   .headline-card {
+    grid-template-columns: 1fr;
+  }
+
+  .today-card-feature {
     grid-template-columns: 1fr;
   }
 

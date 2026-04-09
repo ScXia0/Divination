@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260406-2" />
+    <link rel="stylesheet" href="./styles.css?v=20260409-play" />
   </head>
   <body>
     <div class="page-shell">
@@ -513,7 +513,30 @@
                 <p id="question-ai-note" class="question-ai-note hidden" aria-live="polite"></p>
                 <p id="question-reason" class="question-reason"></p>
                 <div class="question-actions">
+                  <button type="button" id="draw-followup-button" class="inline-link-btn hidden">抽一张追问牌</button>
                   <button type="button" id="back-to-score-button" class="inline-link-btn hidden">回看今日占卜</button>
+                </div>
+              </article>
+
+              <article id="followup-card" class="followup-card hidden">
+                <div class="followup-head">
+                  <p class="oracle-label">追问牌</p>
+                  <p id="followup-card-orientation" class="badge"></p>
+                </div>
+                <h3 id="followup-card-title"></h3>
+                <p id="followup-card-prompt" class="followup-prompt"></p>
+                <p id="followup-card-message"></p>
+                <div class="followup-grid">
+                  <article class="ritual-card">
+                    <span>这张牌提醒</span>
+                    <strong id="followup-card-insight-title"></strong>
+                    <p id="followup-card-insight-text" class="support-text"></p>
+                  </article>
+                  <article class="ritual-card">
+                    <span>下一步可以</span>
+                    <strong id="followup-card-action-title"></strong>
+                    <p id="followup-card-action-text" class="support-text"></p>
+                  </article>
                 </div>
               </article>
 
@@ -556,6 +579,35 @@
               </article>
             </div>
 
+            <div class="play-grid">
+              <article class="oracle-card today-card-feature">
+                <div class="today-card-copy">
+                  <p class="oracle-label">今日一张牌</p>
+                  <h3 id="today-card-name"></h3>
+                  <p id="today-card-orientation" class="badge"></p>
+                  <p id="today-card-message"></p>
+                  <p id="today-card-ritual" class="today-card-ritual"></p>
+                </div>
+                <div class="today-card-visual" aria-hidden="true">
+                  <div class="today-card-stack">
+                    <div class="today-card-layer today-card-shadow"></div>
+                    <div class="today-card-layer today-card-back"></div>
+                    <div class="today-card-layer today-card-front">
+                      <span>Daily Draw</span>
+                      <strong id="today-card-seal"></strong>
+                      <p id="today-card-mood"></p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="oracle-card lucky-time-panel">
+                <p class="oracle-label">幸运时段</p>
+                <h3>今天这几个时间段更顺</h3>
+                <div id="lucky-time-list" class="lucky-time-list"></div>
+              </article>
+            </div>
+
             <div class="ritual-grid">
               <article class="ritual-card">
                 <span>幸运颜色</span>
@@ -588,6 +640,6 @@
       </main>
     </div>
 
-    <script src="./app.js?v=20260406-2"></script>
+    <script src="./app.js?v=20260409-play"></script>
   </body>
 </html>
