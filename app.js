@@ -1409,22 +1409,132 @@ function resolveDailyActivityDetail(rawFocus) {
   };
 }
 
+function extractQuestionCore(rawFocus) {
+  let core = rawFocus.trim().replace(/[。！？?!.]+$/gu, "");
+  const prefixes = [
+    /^我今天(?:到底)?(?:适合不适合|适不适合|适合|要不要|该不该|能不能|可不可以|可以不可以|可以)/u,
+    /^今天(?:到底)?(?:适合不适合|适不适合|适合|要不要|该不该|能不能|可不可以|可以不可以|可以)/u,
+    /^我(?:到底)?(?:要不要|该不该|能不能|可不可以|可以不可以|可以)/u,
+    /^(?:要不要|该不该|能不能|可不可以|可以不可以|可以)/u
+  ];
+
+  prefixes.forEach((pattern) => {
+    core = core.replace(pattern, "");
+  });
+
+  return core
+    .replace(/^(去|把|跟|和)(?=老板|领导|上司|对方|喜欢的人|客户|朋友)/u, (prefix) => prefix)
+    .replace(/(?:比较)?合适吗$/u, "")
+    .replace(/(?:会不会|行不行|可以吗|好吗|呢|呀|吗)$/u, "")
+    .replace(/^是(?:不是)?更适合/u, "")
+    .trim();
+}
+
+function resolveQuestionScene(rawFocus, focusInfo) {
+  if (focusInfo.type === "dailyActivity") {
+    const detail = resolveDailyActivityDetail(rawFocus);
+    return {
+      label: detail.noun,
+      action: detail.noun,
+      generic: false
+    };
+  }
+
+  const core = extractQuestionCore(rawFocus);
+  const fallbackMap = {
+    confession: "把心意说出口",
+    relationship: "推进这段关系",
+    careerAction: "推进这件工作安排",
+    moneyAction: "处理这笔现实决定",
+    energyAction: "照顾今天的状态",
+    overallQuestion: "处理你最在意的这件事"
+  };
+  const fallback = fallbackMap[focusInfo.type] || fallbackMap.overallQuestion;
+
+  return {
+    label: core || fallback,
+    action: core || fallback,
+    generic: !core
+  };
+}
+
+function buildSceneVerdict(focusInfo, decisionLevel, scene) {
+  const verdicts = {
+    confession: {
+      go: `今天适合把“${scene.label}”往前推进，但越真诚自然越容易得到回应。`,
+      maybe: `今天不是不能“${scene.label}”，只是更适合先升温，再决定要不要一步说满。`,
+      wait: `今天先别急着把“${scene.label}”做成结果题，先把气氛和关系温度养起来更稳。`
+    },
+    relationship: {
+      go: `今天适合把“${scene.label}”往前带一点，越自然越顺。`,
+      maybe: `今天更适合先让“${scene.label}”恢复流动感，不必一下子推进到结果层。`,
+      wait: `今天先别急着逼“${scene.label}”出答案，留一点空间反而更好。`
+    },
+    careerAction: {
+      go: `今天适合推进“${scene.label}”，前提是目标、说法和节奏都理顺。`,
+      maybe: `今天可以处理“${scene.label}”，但更适合先铺垫和试探，不必一次推满。`,
+      wait: `今天不太适合硬推“${scene.label}”，先补准备会更稳。`
+    },
+    moneyAction: {
+      go: `今天可以处理“${scene.label}”，但前提是边界和细节都确认过。`,
+      maybe: `今天更适合先看清楚“${scene.label}”里的金额、风险和必要性，再决定。`,
+      wait: `今天先别急着拍板“${scene.label}”，保守一点会更舒服。`
+    },
+    energyAction: {
+      go: `今天适合把“${scene.label}”放进优先级，先把状态稳下来。`,
+      maybe: `今天可以顾“${scene.label}”，但别一下子对自己要求太满。`,
+      wait: `今天更适合先缓一缓，再决定要不要继续“${scene.label}”。`
+    },
+    overallQuestion: {
+      go: `今天适合处理“${scene.label}”，但要按节奏来。`,
+      maybe: `今天不是完全不行，只是“${scene.label}”更适合先准备后行动。`,
+      wait: `今天先别急着给“${scene.label}”定论，等自己更稳一点再决定。`
+    }
+  };
+
+  const set = verdicts[focusInfo.type] || verdicts.overallQuestion;
+  return set[decisionLevel];
+}
+
+function buildScenePreparation(scene, decisionLevel) {
+  if (decisionLevel === "go") {
+    return `如果决定${scene.action}，先把关键细节、说法或安排理顺，再动会更顺。`;
+  }
+
+  if (decisionLevel === "maybe") {
+    return `如果你还在想要不要${scene.action}，先做一点轻量准备和试探，不必一次把动作做满。`;
+  }
+
+  return `先别急着把${scene.action}定死，等信息、状态或时机更顺一点，再决定会更稳。`;
+}
+
+function buildSceneEncouragement(scene, decisionLevel) {
+  if (decisionLevel === "go") {
+    return `你现在需要的不是更用力，而是把“${scene.label}”处理得更自然一点。`;
+  }
+
+  if (decisionLevel === "maybe") {
+    return `慢一点没关系，把“${scene.label}”先放进你舒服的节奏里，通常会更顺。`;
+  }
+
+  return `今天先不急着${scene.action}也没关系，给自己留一点余地，反而更容易接住后面的顺势。`;
+}
+
 function buildQuestionFocusReason(focusInfo, decisionLevel, rawFocus) {
   const profile = focusReasonProfiles[focusInfo.type] || focusReasonProfiles.overallQuestion;
+  const scene = resolveQuestionScene(rawFocus, focusInfo);
 
   if (focusInfo.type === "dailyActivity") {
     const detail = resolveDailyActivityDetail(rawFocus);
     return `如果把问题落回“${detail.noun}”本身，这件事更看${detail.focus}。${profile[decisionLevel]}`;
   }
 
-  const keywordHint = focusInfo.matchedKeywords?.length
-    ? `你这次问到的重点像“${focusInfo.matchedKeywords[0]}”这类动作，`
-    : "";
-
-  return `${keywordHint}这件事更看${profile.focus}。${profile[decisionLevel]}`;
+  return `如果把问题落回“${scene.label}”本身，这件事更看${profile.focus}。${profile[decisionLevel]}`;
 }
 
 function buildQuestionSymbolReason(focusInfo, decisionLevel, tarot, hexagram, rawFocus) {
+  const scene = resolveQuestionScene(rawFocus, focusInfo);
+
   if (focusInfo.type === "dailyActivity") {
     const detail = resolveDailyActivityDetail(rawFocus);
     const direction = decisionLevel === "go"
@@ -1470,7 +1580,7 @@ function buildQuestionSymbolReason(focusInfo, decisionLevel, tarot, hexagram, ra
   };
 
   const typeMap = directionMap[focusInfo.type] || directionMap.overallQuestion;
-  return `塔罗「${tarot.name}」${tarot.orientation}和卦象「${hexagram.name}」的组合，也更支持你${typeMap[decisionLevel]}。`;
+  return `塔罗「${tarot.name}」${tarot.orientation}和卦象「${hexagram.name}」的组合，也更支持你把“${scene.label}”往${typeMap[decisionLevel]}这个方向处理。`;
 }
 
 function buildPreparation(focusInfo, decisionLevel) {
@@ -1576,30 +1686,39 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
   }
 
   const relevantLabel = relevantMetric ? relevantMetric.label : "整体运势";
+  const scene = resolveQuestionScene(rawFocus, focusInfo);
   const questionTitle = `关于“${rawFocus}”`;
   const dailyActivityDetail = focusInfo.type === "dailyActivity" ? resolveDailyActivityDetail(rawFocus) : null;
-  const verdict = dailyActivityDetail ? dailyActivityDetail[decisionLevel] : buildVerdict(focusInfo, decisionLevel);
+  const verdict = dailyActivityDetail
+    ? dailyActivityDetail[decisionLevel]
+    : scene.generic
+      ? buildVerdict(focusInfo, decisionLevel)
+      : buildSceneVerdict(focusInfo, decisionLevel, scene);
   const reason = buildQuestionReason(focusInfo, decisionLevel, totalScore, relevantLabel, relevantScore, tarot, hexagram, rawFocus);
   const relevantTitle = relevantMetric ? `主参考：${relevantLabel}位` : "主参考：整体命盘";
   const relevantText = relevantMetric
-    ? `这次判断优先参考${relevantLabel}位，但也会同时结合今日总运 ${totalScore} 分、塔罗与卦象，不再重复展开四个固定模块。`
-    : `这次问题没有明确落在单一领域，因此主要参考今日总运 ${totalScore} 分与两张占卜依据来回答。`;
+    ? `这次判断优先参考${relevantLabel}位来回答“${scene.label}”，同时也结合今日总运 ${totalScore} 分、塔罗与卦象，不再重复展开四个固定模块。`
+    : `这次问题没有完全落在单一领域，所以主要参考今日总运 ${totalScore} 分与两张占卜依据，来判断“${scene.label}”该怎么处理。`;
   const basisTitle = `${relevantLabel} ${relevantScore} 分`;
   const basisText = relevantMetric
-    ? `${relevantMetric.text} ${relevantMetric.source}`
-    : `这次问题没有明确落在单一领域，因此主要参考今日总运与两张占卜依据来回答。`;
+    ? `${relevantMetric.text} ${relevantMetric.source} 这也是为什么这次对“${scene.label}”会落到现在这条判断。`
+    : `这次问题没有明确落在单一领域，因此主要参考今日总运与两张占卜依据，来回答“${scene.label}”。`;
   const prepText = dailyActivityDetail
     ? (decisionLevel === "go"
       ? `如果决定${dailyActivityDetail.noun}，尽量把时间留得宽一点，别为了安排本身又把自己弄累。`
       : decisionLevel === "maybe"
         ? `如果想${dailyActivityDetail.noun}，先把它当成一件轻松的小安排，不必为了成行去硬凑状态。`
         : `先别急着把${dailyActivityDetail.noun}定死，等状态、天气或同行节奏更顺一点再安排会更舒服。`)
-    : buildPreparation(focusInfo, decisionLevel);
+    : scene.generic
+      ? buildPreparation(focusInfo, decisionLevel)
+      : buildScenePreparation(scene, decisionLevel);
   const encourageText = dailyActivityDetail
     ? (decisionLevel === "wait"
       ? "今天先不勉强自己，也是一种很好的顺势。"
       : "你可以把这件事当成放松，不必把它做成任务。")
-    : buildEncouragement(focusInfo, decisionLevel);
+    : scene.generic
+      ? buildEncouragement(focusInfo, decisionLevel)
+      : buildSceneEncouragement(scene, decisionLevel);
 
   return {
     relevantLabel,
@@ -1616,7 +1735,7 @@ function buildQuestionAnswer(focusInfo, totalScore, metrics, tarot, hexagram, ra
     encourageTitle: decisionLevel === "wait" ? "别急" : "放心去做",
     encourageText,
     guidance: encourageText,
-    context: `这次把你的输入识别成一个具体问题，并优先参考${relevantLabel}位回答；换问题不会改动基础命盘，只会改变解读角度。`,
+    context: `这次把你的输入识别成“${scene.label}”这类具体问题，并优先参考${relevantLabel}位回答；换问题不会改动基础命盘，只会改变解读角度。`,
     summary: verdict,
     title: `${resolveSummary(totalScore).title} · ${targetMomentLabel}问题占断`,
     action: pick(createRng(hashString(`${rawFocus}|action|${decisionLevel}`)), actionPools[focusInfo.category] || generalActions),
