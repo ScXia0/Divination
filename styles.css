@@ -625,6 +625,8 @@ p {
   display: grid;
   gap: 12px;
   align-content: start;
+  position: sticky;
+  top: 18px;
 }
 
 .panel-head h2 {
@@ -646,10 +648,29 @@ label {
   gap: 7px;
 }
 
+.fortune-form > label,
+.ask-module > label {
+  padding: 12px 12px 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(212, 176, 118, 0.1);
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(14, 23, 40, 0.5), rgba(9, 15, 28, 0.34));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
 label > span {
   color: #e9dccb;
   font-size: 1rem;
   font-weight: 500;
+}
+
+.fortune-form > label > span,
+.ask-module > label > span {
+  color: var(--gold-soft);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 input,
@@ -942,6 +963,10 @@ textarea {
   margin-top: 10px;
   font-size: 0.96rem;
   line-height: 1.58;
+}
+
+.guide-card {
+  border-left: 3px solid rgba(239, 201, 141, 0.4);
 }
 
 .guide-footnote {
@@ -1330,6 +1355,12 @@ textarea {
 .question-support-grid {
   display: grid;
   gap: 10px;
+  padding: 10px;
+  border-radius: 24px;
+  border: 1px solid rgba(212, 176, 118, 0.08);
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(11, 19, 33, 0.56), rgba(8, 13, 24, 0.2));
 }
 
 .insight-grid,
@@ -1370,7 +1401,7 @@ textarea {
   display: grid;
   gap: 8px;
   align-content: start;
-  min-height: 174px;
+  min-height: 182px;
 }
 
 .metric-card[data-metric="career"] {
@@ -1399,7 +1430,7 @@ textarea {
 
 .metric-card strong {
   display: block;
-  font-size: 1.8rem;
+  font-size: 2rem;
   line-height: 1.1;
   color: var(--gold-soft);
   text-shadow: 0 8px 20px rgba(212, 176, 118, 0.12);
@@ -1704,6 +1735,11 @@ textarea {
 @media (max-width: 980px) {
   .content-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-column {
+    position: static;
+    top: auto;
   }
 
   .empty-state-preview {
