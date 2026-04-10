@@ -9,6 +9,8 @@
   --gold: #d4a765;
   --gold-soft: #efc98d;
   --accent: #8f5366;
+  --accent-soft: #b77488;
+  --blue-soft: #6f8fce;
   --green: #8eb9a2;
   --shadow: 0 24px 64px rgba(1, 3, 8, 0.44);
   --glow: 0 0 0 1px rgba(212, 176, 118, 0.08), 0 14px 34px rgba(0, 0, 0, 0.28);
@@ -149,9 +151,9 @@ p {
   border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.11), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(84, 109, 165, 0.1), transparent 26%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 34%, transparent 72%, rgba(212, 176, 118, 0.03));
+    linear-gradient(125deg, rgba(239, 201, 141, 0.12), transparent 22%, transparent 72%, rgba(111, 143, 206, 0.08)),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.16), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(111, 143, 206, 0.14), transparent 28%);
 }
 
 .panel::after {
@@ -196,22 +198,25 @@ p {
 
 .form-panel {
   background:
-    radial-gradient(circle at top left, rgba(143, 83, 102, 0.1), transparent 24%),
-    radial-gradient(circle at bottom right, rgba(212, 176, 118, 0.08), transparent 26%),
+    linear-gradient(145deg, rgba(183, 116, 136, 0.18), transparent 24%, transparent 74%, rgba(239, 201, 141, 0.12)),
+    radial-gradient(circle at top left, rgba(183, 116, 136, 0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(212, 176, 118, 0.14), transparent 28%),
     linear-gradient(180deg, rgba(14, 23, 40, 0.96), rgba(8, 13, 24, 0.95));
 }
 
 .result-panel {
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.12), transparent 24%),
-    radial-gradient(circle at 18% 44%, rgba(95, 121, 178, 0.12), transparent 32%),
+    linear-gradient(145deg, rgba(239, 201, 141, 0.14), transparent 20%, transparent 70%, rgba(111, 143, 206, 0.16)),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.18), transparent 28%),
+    radial-gradient(circle at 18% 44%, rgba(111, 143, 206, 0.16), transparent 34%),
     linear-gradient(180deg, rgba(13, 22, 39, 0.97), rgba(7, 12, 23, 0.96));
 }
 
 .guide-panel {
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.11), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(143, 83, 102, 0.1), transparent 28%),
+    linear-gradient(150deg, rgba(239, 201, 141, 0.12), transparent 22%, transparent 76%, rgba(183, 116, 136, 0.12)),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.15), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(183, 116, 136, 0.14), transparent 30%),
     linear-gradient(180deg, rgba(14, 24, 41, 0.95), rgba(8, 13, 24, 0.94));
 }
 
@@ -650,13 +655,26 @@ label {
 
 .fortune-form > label,
 .ask-module > label {
+  position: relative;
+  overflow: hidden;
   padding: 12px 12px 10px;
   border-radius: 18px;
   border: 1px solid rgba(212, 176, 118, 0.1);
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 28%),
-    linear-gradient(180deg, rgba(14, 23, 40, 0.5), rgba(9, 15, 28, 0.34));
+    linear-gradient(120deg, rgba(239, 201, 141, 0.14), rgba(183, 116, 136, 0.08) 34%, transparent 66%),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(18, 28, 47, 0.74), rgba(9, 15, 28, 0.42));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.fortune-form > label::before,
+.ask-module > label::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(239, 201, 141, 0.96), rgba(183, 116, 136, 0.82), rgba(111, 143, 206, 0.7));
+  opacity: 0.9;
 }
 
 label > span {
@@ -727,7 +745,9 @@ textarea {
   padding: 7px;
   border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.14);
-  background: linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
+  background:
+    linear-gradient(135deg, rgba(239, 201, 141, 0.08), transparent 34%, rgba(111, 143, 206, 0.06)),
+    linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
 }
 
 .date-group {
@@ -818,7 +838,7 @@ textarea {
   border-radius: 16px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 24%),
+    linear-gradient(120deg, rgba(239, 201, 141, 0.12), rgba(183, 116, 136, 0.14) 46%, rgba(111, 143, 206, 0.1)),
     linear-gradient(180deg, rgba(143, 83, 102, 0.09), rgba(13, 21, 39, 0.76));
 }
 
@@ -854,6 +874,7 @@ textarea {
   border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background:
+    linear-gradient(135deg, rgba(239, 201, 141, 0.12), rgba(183, 116, 136, 0.12) 40%, rgba(111, 143, 206, 0.08)),
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.07), transparent 24%),
     linear-gradient(180deg, rgba(14, 23, 40, 0.92), rgba(9, 15, 28, 0.88));
 }
@@ -1293,7 +1314,8 @@ textarea {
   border-radius: 22px;
   border: 1px solid rgba(212, 176, 118, 0.16);
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.14), transparent 28%),
+    linear-gradient(120deg, rgba(239, 201, 141, 0.14), rgba(183, 116, 136, 0.12) 40%, rgba(111, 143, 206, 0.12)),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.16), transparent 28%),
     linear-gradient(135deg, rgba(17, 27, 46, 0.96), rgba(10, 15, 27, 0.94));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
@@ -1320,6 +1342,7 @@ textarea {
   border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.22);
   background:
+    linear-gradient(135deg, rgba(239, 201, 141, 0.14), rgba(183, 116, 136, 0.08) 46%, rgba(111, 143, 206, 0.08)),
     radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 40%),
     linear-gradient(180deg, rgba(252, 248, 239, 0.08), rgba(255, 255, 255, 0.02));
   text-align: center;
@@ -1353,14 +1376,30 @@ textarea {
 .play-grid,
 .ritual-grid,
 .question-support-grid {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 10px;
   padding: 10px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 118, 0.08);
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.06), transparent 28%),
+    linear-gradient(120deg, rgba(239, 201, 141, 0.12), rgba(183, 116, 136, 0.08) 34%, transparent 64%, rgba(111, 143, 206, 0.1)),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 30%),
     linear-gradient(180deg, rgba(11, 19, 33, 0.56), rgba(8, 13, 24, 0.2));
+}
+
+.insight-grid::before,
+.metric-grid::before,
+.oracle-grid::before,
+.play-grid::before,
+.ritual-grid::before,
+.question-support-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(239, 201, 141, 0.96), rgba(183, 116, 136, 0.82), rgba(111, 143, 206, 0.76));
 }
 
 .insight-grid,
@@ -1489,6 +1528,9 @@ textarea {
   gap: 14px;
   align-items: center;
   min-height: 216px;
+  background:
+    linear-gradient(125deg, rgba(239, 201, 141, 0.1), rgba(183, 116, 136, 0.08) 42%, rgba(111, 143, 206, 0.1)),
+    linear-gradient(180deg, rgba(16, 25, 43, 0.94), rgba(10, 16, 30, 0.95));
 }
 
 .today-card-copy {
@@ -1604,6 +1646,7 @@ textarea {
   border-radius: 16px;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background:
+    linear-gradient(125deg, rgba(239, 201, 141, 0.12), rgba(111, 143, 206, 0.08) 62%, transparent),
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 32%),
     linear-gradient(180deg, rgba(16, 25, 43, 0.9), rgba(11, 17, 30, 0.94));
 }
