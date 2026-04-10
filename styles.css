@@ -10,8 +10,13 @@
   --gold-soft: #efc98d;
   --accent: #8f5366;
   --green: #8eb9a2;
-  --shadow: 0 30px 80px rgba(1, 3, 8, 0.55);
-  --glow: 0 0 0 1px rgba(212, 176, 118, 0.08), 0 16px 44px rgba(0, 0, 0, 0.34);
+  --shadow: 0 24px 64px rgba(1, 3, 8, 0.44);
+  --glow: 0 0 0 1px rgba(212, 176, 118, 0.08), 0 14px 34px rgba(0, 0, 0, 0.28);
+  --hairline: rgba(255, 255, 255, 0.055);
+  --panel-grad-top: rgba(18, 30, 51, 0.94);
+  --panel-grad-mid: rgba(11, 18, 34, 0.93);
+  --panel-grad-bottom: rgba(7, 12, 23, 0.95);
+  --page-glow: radial-gradient(circle at top, rgba(212, 176, 118, 0.1), transparent 56%);
 }
 
 * {
@@ -28,10 +33,12 @@ body {
   font-family: "Noto Sans SC", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at 15% 20%, rgba(143, 83, 102, 0.22), transparent 26%),
-    radial-gradient(circle at 85% 18%, rgba(212, 176, 118, 0.14), transparent 22%),
-    radial-gradient(circle at 50% 0%, rgba(95, 121, 178, 0.18), transparent 30%),
-    linear-gradient(180deg, #09111e 0%, #050914 48%, #060a12 100%);
+    radial-gradient(circle at 10% 14%, rgba(143, 83, 102, 0.18), transparent 22%),
+    radial-gradient(circle at 84% 10%, rgba(212, 176, 118, 0.11), transparent 20%),
+    radial-gradient(circle at 50% -8%, rgba(95, 121, 178, 0.14), transparent 26%),
+    radial-gradient(circle at 50% 42%, rgba(43, 63, 103, 0.13), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(10, 19, 35, 0.72), transparent 42%),
+    linear-gradient(180deg, #0b1422 0%, #08101b 24%, #060b15 54%, #05070e 100%);
   position: relative;
   overflow-x: hidden;
 }
@@ -56,15 +63,15 @@ body::before {
 
 body::after {
   background:
-    linear-gradient(125deg, rgba(255, 255, 255, 0.04), transparent 28%, transparent 72%, rgba(255, 255, 255, 0.03)),
+    linear-gradient(125deg, rgba(255, 255, 255, 0.03), transparent 24%, transparent 76%, rgba(255, 255, 255, 0.025)),
     repeating-linear-gradient(
       90deg,
       transparent 0,
-      transparent 78px,
-      rgba(212, 176, 118, 0.02) 78px,
-      rgba(212, 176, 118, 0.02) 79px
+      transparent 88px,
+      rgba(212, 176, 118, 0.018) 88px,
+      rgba(212, 176, 118, 0.018) 89px
     );
-  opacity: 0.38;
+  opacity: 0.28;
 }
 
 h1,
@@ -79,19 +86,60 @@ p {
 }
 
 .page-shell {
-  width: min(100% - 24px, 1380px);
+  position: relative;
+  isolation: isolate;
+  width: min(100% - 24px, 1340px);
   margin: 0 auto;
-  padding: 28px 0 56px;
+  padding: 22px 0 42px;
+}
+
+.page-shell::before,
+.page-shell::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.page-shell::before {
+  top: -36px;
+  left: 2%;
+  right: 2%;
+  height: 360px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(143, 83, 102, 0.2), transparent 26%),
+    radial-gradient(circle at 74% 16%, rgba(212, 176, 118, 0.12), transparent 26%),
+    radial-gradient(circle at 50% 0%, rgba(95, 121, 178, 0.14), transparent 30%);
+  filter: blur(16px);
+  opacity: 0.9;
+}
+
+.page-shell::after {
+  top: 300px;
+  left: 6%;
+  right: 6%;
+  height: 620px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 18%, transparent 78%, rgba(212, 176, 118, 0.03)),
+    radial-gradient(circle at 30% 18%, rgba(212, 176, 118, 0.08), transparent 28%),
+    radial-gradient(circle at 72% 54%, rgba(95, 121, 178, 0.1), transparent 34%);
+  filter: blur(14px);
+  opacity: 0.8;
 }
 
 .panel {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 26px;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(12, 19, 35, 0.95), rgba(8, 13, 24, 0.92));
+  background: linear-gradient(180deg, var(--panel-grad-top) 0%, var(--panel-grad-mid) 46%, var(--panel-grad-bottom) 100%);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 240ms ease;
+}
+
+.panel:hover {
+  transform: translateY(-1px);
 }
 
 .panel::before {
@@ -101,14 +149,25 @@ p {
   border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.12), transparent 32%),
-    linear-gradient(140deg, rgba(255, 255, 255, 0.03), transparent 35%, transparent 70%, rgba(212, 176, 118, 0.03));
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.11), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(84, 109, 165, 0.1), transparent 26%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 34%, transparent 72%, rgba(212, 176, 118, 0.03));
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 20%, transparent 80%, rgba(255, 255, 255, 0.01));
+  opacity: 0.8;
 }
 
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
-  gap: 20px;
+  gap: 14px;
   align-items: stretch;
 }
 
@@ -118,41 +177,101 @@ p {
 .result-panel,
 .guide-panel {
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
+}
+
+.hero-copy {
+  background:
+    radial-gradient(circle at top left, rgba(212, 176, 118, 0.12), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(143, 83, 102, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(17, 29, 49, 0.96), rgba(8, 14, 26, 0.94));
+}
+
+.hero-visual {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(95, 121, 178, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(212, 176, 118, 0.14), transparent 22%),
+    linear-gradient(180deg, rgba(15, 25, 44, 0.96), rgba(7, 12, 24, 0.95));
+}
+
+.form-panel {
+  background:
+    radial-gradient(circle at top left, rgba(143, 83, 102, 0.1), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(212, 176, 118, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(14, 23, 40, 0.96), rgba(8, 13, 24, 0.95));
+}
+
+.result-panel {
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.12), transparent 24%),
+    radial-gradient(circle at 18% 44%, rgba(95, 121, 178, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(13, 22, 39, 0.97), rgba(7, 12, 23, 0.96));
+}
+
+.guide-panel {
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.11), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(143, 83, 102, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(14, 24, 41, 0.95), rgba(8, 13, 24, 0.94));
+}
+
+.panel-head {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(212, 176, 118, 0.1);
+}
+
+.panel-head::after {
+  content: "";
+  width: 76px;
+  height: 1px;
+  margin-top: 2px;
+  background: linear-gradient(90deg, rgba(239, 201, 141, 0.9), rgba(239, 201, 141, 0.16) 72%, transparent);
+}
+
+.panel-head p:last-child {
+  color: var(--muted);
+  line-height: 1.66;
+}
+
+.panel-head.compact {
+  padding-bottom: 12px;
 }
 
 .eyebrow {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   color: var(--gold-soft);
   font-family: "Cormorant Garamond", serif;
-  font-size: 1.2rem;
-  letter-spacing: 0.2em;
+  font-size: 1rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
+  opacity: 0.9;
 }
 
 .hero-copy h1 {
   margin: 0;
   max-width: 100%;
-  font-size: clamp(2.8rem, 6.2vw, 4.95rem);
-  line-height: 1.02;
+  font-size: clamp(2.7rem, 5.8vw, 4.45rem);
+  line-height: 1;
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .hero-text {
-  margin-top: 18px;
-  max-width: 32rem;
+  margin-top: 12px;
+  max-width: 29rem;
   color: var(--muted);
-  font-size: 1.02rem;
-  line-height: 1.9;
+  font-size: 0.98rem;
+  line-height: 1.76;
 }
 
 .hero-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .hero-tags span,
@@ -160,20 +279,20 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 0 14px;
+  min-height: 32px;
+  padding: 0 13px;
   border-radius: 999px;
   border: 1px solid rgba(212, 176, 118, 0.32);
-  background: rgba(212, 176, 118, 0.08);
+  background: linear-gradient(180deg, rgba(212, 176, 118, 0.1), rgba(212, 176, 118, 0.045));
   color: var(--gold-soft);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .hero-signals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .signal-card,
@@ -187,8 +306,10 @@ p {
 .followup-card {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   border-radius: 22px;
   box-shadow: var(--glow);
+  backdrop-filter: blur(14px);
 }
 
 .signal-card,
@@ -201,11 +322,78 @@ p {
 .question-card,
 .followup-card {
   border: 1px solid rgba(212, 176, 118, 0.11);
-  background: linear-gradient(180deg, rgba(14, 23, 40, 0.95), rgba(9, 15, 28, 0.94));
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(16, 25, 43, 0.94), rgba(10, 16, 30, 0.95));
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 220ms ease;
+}
+
+.signal-card::before,
+.guide-card::before,
+.insight-card::before,
+.metric-card::before,
+.ritual-card::before,
+.oracle-card::before,
+.message-block::before,
+.question-card::before,
+.followup-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.06), transparent 24%, transparent 72%, rgba(212, 176, 118, 0.025)),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 42%);
+  opacity: 0.7;
+}
+
+.signal-card::after,
+.guide-card::after,
+.insight-card::after,
+.metric-card::after,
+.ritual-card::after,
+.oracle-card::after,
+.message-block::after,
+.question-card::after,
+.followup-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.018);
+  box-shadow: inset 0 1px 0 var(--hairline);
+}
+
+.signal-card > *,
+.guide-card > *,
+.insight-card > *,
+.metric-card > *,
+.ritual-card > *,
+.oracle-card > *,
+.message-block > *,
+.question-card > *,
+.followup-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.signal-card:hover,
+.guide-card:hover,
+.insight-card:hover,
+.metric-card:hover,
+.ritual-card:hover,
+.oracle-card:hover,
+.message-block:hover,
+.question-card:hover,
+.followup-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 176, 118, 0.2);
+  box-shadow: 0 0 0 1px rgba(212, 176, 118, 0.08), 0 18px 34px rgba(0, 0, 0, 0.24);
 }
 
 .signal-card {
-  padding: 18px;
+  padding: 15px;
 }
 
 .signal-card span,
@@ -225,24 +413,50 @@ p {
   text-transform: uppercase;
 }
 
+.section-kicker,
+.oracle-label,
+.focus-example-label,
+.fortune-title {
+  position: relative;
+  width: fit-content;
+  padding-left: 14px;
+}
+
+.section-kicker::before,
+.oracle-label::before,
+.focus-example-label::before,
+.fortune-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(239, 201, 141, 0.95), rgba(196, 146, 132, 0.9));
+  box-shadow: 0 0 0 4px rgba(212, 176, 118, 0.08);
+  transform: translateY(-50%);
+}
+
 .signal-card strong {
   display: block;
   margin-top: 10px;
   font-size: 1.35rem;
+  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
 .signal-card p {
-  margin-top: 10px;
+  margin-top: 8px;
   color: var(--muted);
-  line-height: 1.75;
-  font-size: 0.92rem;
+  line-height: 1.68;
+  font-size: 0.88rem;
 }
 
 .hero-visual {
   display: grid;
   grid-template-rows: minmax(260px, 1fr) auto;
-  gap: 20px;
-  min-height: 520px;
+  gap: 14px;
+  min-height: 472px;
 }
 
 .visual-stars,
@@ -263,10 +477,10 @@ p {
 }
 
 .visual-moon {
-  top: 26px;
-  right: 26px;
-  width: 120px;
-  height: 120px;
+  top: 18px;
+  right: 18px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   background: radial-gradient(circle at 34% 32%, rgba(255, 249, 232, 0.95), rgba(212, 176, 118, 0.72) 58%, rgba(212, 176, 118, 0.08) 100%);
   box-shadow: 0 0 50px rgba(212, 176, 118, 0.24);
@@ -274,14 +488,14 @@ p {
 
 .tarot-stack {
   position: relative;
-  min-height: 300px;
+  min-height: 260px;
 }
 
 .tarot-card {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(280px, 75%);
+  width: min(266px, 73%);
   aspect-ratio: 0.7;
   border-radius: 26px;
   transform-origin: center;
@@ -313,7 +527,7 @@ p {
 .tarot-card-main {
   display: grid;
   place-items: center;
-  padding: 28px;
+  padding: 24px;
   text-align: center;
   transform: translate(-50%, -50%);
   background:
@@ -338,33 +552,36 @@ p {
   z-index: 1;
   color: var(--gold-soft);
   font-family: "Cormorant Garamond", serif;
-  font-size: 1rem;
-  letter-spacing: 0.34em;
+  font-size: 0.9rem;
+  letter-spacing: 0.26em;
 }
 
 .tarot-card-main strong {
   position: relative;
   z-index: 1;
-  margin-top: 18px;
-  font-size: 2.25rem;
+  margin-top: 14px;
+  font-size: 2rem;
 }
 
 .tarot-card-main p {
   position: relative;
   z-index: 1;
-  margin-top: 14px;
+  margin-top: 10px;
   color: var(--muted);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .hero-legend {
   position: relative;
   z-index: 1;
-  padding: 22px;
-  border-radius: 24px;
+  padding: 16px;
+  border-radius: 22px;
   border: 1px solid rgba(212, 176, 118, 0.14);
-  background: rgba(7, 11, 21, 0.66);
+  background:
+    linear-gradient(180deg, rgba(8, 13, 24, 0.76), rgba(7, 11, 21, 0.58)),
+    var(--page-glow);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .hero-legend h2,
@@ -373,8 +590,8 @@ p {
 .oracle-card h3,
 .message-block h3,
 .question-card h3 {
-  margin: 10px 0 0;
-  font-size: 1.9rem;
+  margin: 8px 0 0;
+  font-size: 1.75rem;
   line-height: 1.25;
 }
 
@@ -393,45 +610,45 @@ p {
 .disclaimer,
 .insight-card p {
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.72;
 }
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: minmax(318px, 392px) minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 14px;
   align-items: start;
 }
 
 .form-column {
   display: grid;
-  gap: 18px;
+  gap: 12px;
   align-content: start;
 }
 
 .panel-head h2 {
-  font-size: 2rem;
+  font-size: 1.76rem;
 }
 
 .panel-head.compact h2 {
-  font-size: 1.56rem;
+  font-size: 1.36rem;
 }
 
 .fortune-form {
   display: grid;
-  gap: 18px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 label {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 label > span {
   color: #e9dccb;
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -447,10 +664,12 @@ select,
 textarea {
   width: 100%;
   border: 1px solid rgba(212, 176, 118, 0.16);
-  border-radius: 18px;
-  background: rgba(252, 248, 239, 0.045);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(252, 248, 239, 0.05), rgba(255, 255, 255, 0.018));
   color: var(--ink);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 input::placeholder,
@@ -469,23 +688,23 @@ button:focus-visible {
 
 input,
 select {
-  min-height: 58px;
-  padding: 0 18px;
+  min-height: 52px;
+  padding: 0 15px;
 }
 
 textarea {
-  min-height: 132px;
-  padding: 16px 18px;
+  min-height: 108px;
+  padding: 13px 15px;
   resize: vertical;
-  line-height: 1.8;
+  line-height: 1.72;
 }
 
 .date-group,
 .time-group {
   display: grid;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 24px;
+  gap: 7px;
+  padding: 7px;
+  border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background: linear-gradient(180deg, rgba(250, 243, 231, 0.04), rgba(255, 255, 255, 0.02));
 }
@@ -509,8 +728,8 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 48px;
   min-width: 0;
-  min-height: 68px;
-  border-radius: 18px;
+  min-height: 58px;
+  border-radius: 15px;
   overflow: hidden;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background: rgba(6, 11, 21, 0.72);
@@ -555,8 +774,8 @@ textarea {
 
 .date-hint {
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.7;
+  font-size: 0.85rem;
+  line-height: 1.64;
 }
 
 .auto-derived {
@@ -573,11 +792,13 @@ textarea {
 
 .focus-example {
   display: grid;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
   border: 1px solid rgba(212, 176, 118, 0.14);
-  background: linear-gradient(180deg, rgba(143, 83, 102, 0.11), rgba(13, 21, 39, 0.76));
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(143, 83, 102, 0.09), rgba(13, 21, 39, 0.76));
 }
 
 .focus-example p {
@@ -588,11 +809,11 @@ textarea {
 
 .focus-example-action {
   justify-self: start;
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 34px;
+  padding: 0 13px;
   border: 1px solid rgba(212, 176, 118, 0.28);
   border-radius: 999px;
-  background: rgba(212, 176, 118, 0.08);
+  background: linear-gradient(180deg, rgba(212, 176, 118, 0.11), rgba(212, 176, 118, 0.05));
   color: var(--gold-soft);
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
@@ -606,12 +827,14 @@ textarea {
 
 .ask-module {
   display: grid;
-  gap: 14px;
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: 24px;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.14);
-  background: linear-gradient(180deg, rgba(14, 23, 40, 0.92), rgba(9, 15, 28, 0.88));
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.07), transparent 24%),
+    linear-gradient(180deg, rgba(14, 23, 40, 0.92), rgba(9, 15, 28, 0.88));
 }
 
 .ask-actions,
@@ -620,16 +843,16 @@ textarea {
 .question-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .secondary-btn,
 .inline-link-btn {
-  min-height: 42px;
-  padding: 0 16px;
+  min-height: 40px;
+  padding: 0 15px;
   border-radius: 999px;
   border: 1px solid rgba(212, 176, 118, 0.26);
-  background: rgba(212, 176, 118, 0.08);
+  background: linear-gradient(180deg, rgba(212, 176, 118, 0.1), rgba(212, 176, 118, 0.045));
   color: var(--gold-soft);
   font-weight: 600;
   cursor: pointer;
@@ -653,41 +876,56 @@ textarea {
 }
 
 .secondary-btn {
-  min-width: 168px;
+  min-width: 154px;
 }
 
 .headline-actions {
-  margin-top: 16px;
-}
-
-.question-actions {
   margin-top: 12px;
 }
 
+.question-actions {
+  margin-top: 10px;
+}
+
 .primary-btn {
-  min-height: 62px;
+  position: relative;
+  overflow: hidden;
+  min-height: 56px;
   border: 1px solid rgba(239, 201, 141, 0.4);
-  border-radius: 20px;
+  border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(212, 176, 118, 0.95), rgba(143, 83, 102, 0.9)),
+    linear-gradient(120deg, rgba(238, 202, 139, 0.98), rgba(196, 146, 132, 0.9) 52%, rgba(147, 92, 113, 0.94)),
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
   color: #140f0a;
-  font-size: 1.15rem;
+  font-size: 1.08rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 18px 34px rgba(143, 83, 102, 0.35);
+  box-shadow: 0 14px 28px rgba(143, 83, 102, 0.28);
   transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.primary-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.3) 42%, transparent 62%);
+  transform: translateX(-120%);
+  transition: transform 420ms ease;
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 24px 42px rgba(143, 83, 102, 0.42);
+  box-shadow: 0 18px 34px rgba(143, 83, 102, 0.34);
+}
+
+.primary-btn:hover::before {
+  transform: translateX(120%);
 }
 
 .guide-grid {
   display: grid;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .guide-card,
@@ -697,41 +935,41 @@ textarea {
 .oracle-card,
 .message-block,
 .question-card {
-  padding: 18px;
+  padding: 15px;
 }
 
 .guide-card p {
-  margin-top: 12px;
-  font-size: 1.05rem;
-  line-height: 1.7;
+  margin-top: 10px;
+  font-size: 0.96rem;
+  line-height: 1.58;
 }
 
 .guide-footnote {
-  margin-top: 16px;
-  font-size: 0.92rem;
-}
-
-.guide-panel .panel-head p:last-child {
   margin-top: 10px;
-  color: var(--muted);
-  line-height: 1.75;
+  font-size: 0.88rem;
 }
 
 .guide-actions {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .empty-state {
   position: relative;
   display: grid;
-  gap: 28px;
-  margin-top: 18px;
-  min-height: 1180px;
-  padding: 34px;
-  border-radius: 30px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  grid-template-areas:
+    "copy preview"
+    "lore lore"
+    "notes ritual";
+  gap: 16px;
+  margin-top: 14px;
+  min-height: 0;
+  padding: 22px;
+  border-radius: 26px;
   border: 1px solid rgba(212, 176, 118, 0.14);
   background:
-    radial-gradient(circle at top right, rgba(212, 176, 118, 0.1), transparent 28%),
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.09), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(84, 109, 165, 0.08), transparent 24%),
     linear-gradient(180deg, rgba(12, 20, 35, 0.94), rgba(7, 12, 24, 0.96));
   overflow: hidden;
 }
@@ -756,6 +994,7 @@ textarea {
 }
 
 .empty-state-copy {
+  grid-area: copy;
   max-width: 680px;
 }
 
@@ -768,42 +1007,50 @@ textarea {
 }
 
 .empty-state-copy h3 {
-  margin: 12px 0 0;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 10px 0 0;
+  font-size: clamp(1.8rem, 3.8vw, 2.8rem);
   line-height: 1.18;
 }
 
 .empty-state-copy p:last-child {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   max-width: 52ch;
 }
 
 .empty-state-preview {
+  grid-area: preview;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  align-items: end;
-  margin-top: auto;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-content: start;
 }
 
 .empty-state-lore {
+  grid-area: lore;
   display: grid;
-  grid-template-columns: 1.15fr 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
 
 .empty-state-notes {
+  grid-area: notes;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
+}
+
+.empty-state-ritual {
+  grid-area: ritual;
 }
 
 .empty-state-card {
-  min-height: 196px;
-  padding: 20px;
-  border-radius: 24px;
+  min-height: 0;
+  padding: 15px;
+  border-radius: 18px;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 36%),
     linear-gradient(180deg, rgba(16, 26, 45, 0.96), rgba(10, 15, 27, 0.94));
   box-shadow: var(--glow);
 }
@@ -818,24 +1065,24 @@ textarea {
 
 .empty-state-card strong {
   display: block;
-  margin-top: 14px;
-  font-size: 1.42rem;
+  margin-top: 12px;
+  font-size: 1.28rem;
   color: var(--ink);
 }
 
 .empty-state-card p {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: var(--muted);
-  line-height: 1.75;
+  line-height: 1.68;
 }
 
 .empty-state-illustration,
 .empty-state-fact {
   position: relative;
   overflow: hidden;
-  min-height: 220px;
-  padding: 22px;
-  border-radius: 26px;
+  min-height: 182px;
+  padding: 16px;
+  border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background:
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 30%),
@@ -854,23 +1101,23 @@ textarea {
 
 .empty-state-fact strong {
   display: block;
-  margin-top: 14px;
-  font-size: 1.35rem;
+  margin-top: 12px;
+  font-size: 1.22rem;
   line-height: 1.35;
   color: var(--ink);
 }
 
 .empty-state-fact p {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: var(--muted);
-  line-height: 1.75;
+  line-height: 1.68;
 }
 
 .empty-state-note,
 .empty-state-ritual {
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background:
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.06), transparent 30%),
@@ -879,8 +1126,8 @@ textarea {
 }
 
 .empty-state-note {
-  min-height: 170px;
-  padding: 18px;
+  min-height: 0;
+  padding: 14px;
 }
 
 .empty-state-note span,
@@ -900,7 +1147,7 @@ textarea {
 }
 
 .empty-state-note strong {
-  font-size: 1.28rem;
+  font-size: 1.16rem;
 }
 
 .empty-state-note p,
@@ -911,24 +1158,26 @@ textarea {
 }
 
 .empty-state-ritual {
-  padding: 22px 24px;
+  display: grid;
+  align-content: start;
+  padding: 16px 18px;
 }
 
 .empty-state-ritual strong {
-  font-size: 1.48rem;
+  font-size: 1.32rem;
   line-height: 1.35;
 }
 
 .empty-tarot-stack {
   position: relative;
-  min-height: 260px;
+  min-height: 196px;
 }
 
 .empty-tarot-card {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(230px, 80%);
+  width: min(200px, 76%);
   aspect-ratio: 0.7;
   border-radius: 24px;
   transform-origin: center;
@@ -951,7 +1200,7 @@ textarea {
 .empty-tarot-card-main {
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 20px;
   text-align: center;
   transform: translate(-50%, -50%);
   background:
@@ -984,17 +1233,17 @@ textarea {
   position: relative;
   z-index: 1;
   display: block;
-  margin-top: 14px;
-  font-size: 1.8rem;
+  margin-top: 12px;
+  font-size: 1.56rem;
   line-height: 1.25;
 }
 
 .empty-tarot-card-main p {
   position: relative;
   z-index: 1;
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--muted);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -1002,8 +1251,8 @@ textarea {
 .result-mode,
 .question-view {
   display: grid;
-  gap: 16px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .hidden {
@@ -1013,14 +1262,15 @@ textarea {
 .headline-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
+  gap: 12px;
   align-items: start;
-  padding: 22px;
-  border-radius: 24px;
+  padding: 16px;
+  border-radius: 22px;
   border: 1px solid rgba(212, 176, 118, 0.16);
   background:
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.14), transparent 28%),
     linear-gradient(135deg, rgba(17, 27, 46, 0.96), rgba(10, 15, 27, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .fortune-title {
@@ -1028,31 +1278,48 @@ textarea {
 }
 
 .headline-card h3 {
-  margin-top: 10px;
-  font-size: clamp(1.9rem, 3.4vw, 2.75rem);
+  margin-top: 8px;
+  font-size: clamp(1.7rem, 3vw, 2.45rem);
 }
 
 .fortune-context {
-  margin-top: 14px;
+  margin-top: 10px;
   max-width: 58ch;
 }
 
 .score-wrap {
+  position: relative;
+  overflow: hidden;
   min-width: 148px;
-  padding: 16px 18px;
-  border-radius: 22px;
+  padding: 14px 16px;
+  border-radius: 20px;
   border: 1px solid rgba(212, 176, 118, 0.22);
-  background: linear-gradient(180deg, rgba(252, 248, 239, 0.07), rgba(255, 255, 255, 0.02));
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 40%),
+    linear-gradient(180deg, rgba(252, 248, 239, 0.08), rgba(255, 255, 255, 0.02));
   text-align: center;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
+.score-wrap::after {
+  content: "";
+  position: absolute;
+  top: -32px;
+  right: -22px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 201, 141, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
 .score-wrap strong {
   display: block;
-  margin-top: 10px;
-  font-size: clamp(2.8rem, 4vw, 4rem);
+  margin-top: 8px;
+  font-size: clamp(2.45rem, 3.8vw, 3.5rem);
   line-height: 0.95;
   color: var(--gold);
+  text-shadow: 0 10px 22px rgba(212, 176, 118, 0.16);
 }
 
 .insight-grid,
@@ -1062,15 +1329,18 @@ textarea {
 .ritual-grid,
 .question-support-grid {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .insight-grid,
-.metric-grid,
 .oracle-grid,
 .play-grid,
 .question-support-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .ritual-grid {
@@ -1079,9 +1349,9 @@ textarea {
 
 .insight-card {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-content: start;
-  min-height: 158px;
+  min-height: 142px;
 }
 
 .insight-card-wide {
@@ -1091,23 +1361,48 @@ textarea {
 
 .insight-card strong {
   display: block;
-  font-size: 1.42rem;
-  line-height: 1.4;
+  font-size: 1.3rem;
+  line-height: 1.34;
   color: var(--ink);
 }
 
 .metric-card {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-content: start;
-  min-height: 218px;
+  min-height: 174px;
+}
+
+.metric-card[data-metric="career"] {
+  background:
+    radial-gradient(circle at top right, rgba(95, 121, 178, 0.22), transparent 26%),
+    linear-gradient(180deg, rgba(17, 27, 48, 0.96), rgba(9, 16, 30, 0.95));
+}
+
+.metric-card[data-metric="love"] {
+  background:
+    radial-gradient(circle at top right, rgba(143, 83, 102, 0.24), transparent 26%),
+    linear-gradient(180deg, rgba(18, 26, 43, 0.96), rgba(10, 15, 28, 0.95));
+}
+
+.metric-card[data-metric="wealth"] {
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 118, 0.22), transparent 26%),
+    linear-gradient(180deg, rgba(18, 28, 45, 0.96), rgba(9, 16, 29, 0.95));
+}
+
+.metric-card[data-metric="energy"] {
+  background:
+    radial-gradient(circle at top right, rgba(142, 185, 162, 0.2), transparent 28%),
+    linear-gradient(180deg, rgba(16, 27, 44, 0.96), rgba(9, 16, 29, 0.95));
 }
 
 .metric-card strong {
   display: block;
-  font-size: 1.98rem;
+  font-size: 1.8rem;
   line-height: 1.1;
   color: var(--gold-soft);
+  text-shadow: 0 8px 20px rgba(212, 176, 118, 0.12);
 }
 
 .metric-card.active-focus {
@@ -1117,22 +1412,22 @@ textarea {
 
 .metric-source {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid rgba(212, 176, 118, 0.12);
   font-size: 0.84rem;
 }
 
 .ritual-card {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   align-content: start;
-  min-height: 142px;
+  min-height: 118px;
 }
 
 .ritual-card strong,
 .question-support-grid .ritual-card strong {
   display: block;
-  font-size: 1.55rem;
+  font-size: 1.38rem;
   color: var(--ink);
 }
 
@@ -1154,20 +1449,20 @@ textarea {
 .today-card-feature,
 .lucky-time-panel,
 .followup-card {
-  padding: 20px;
+  padding: 16px;
 }
 
 .today-card-feature {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(180px, 0.9fr);
-  gap: 18px;
+  gap: 14px;
   align-items: center;
-  min-height: 250px;
+  min-height: 216px;
 }
 
 .today-card-copy {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .today-card-ritual {
@@ -1177,12 +1472,12 @@ textarea {
 .today-card-visual {
   display: grid;
   place-items: center;
-  min-height: 210px;
+  min-height: 176px;
 }
 
 .today-card-stack {
   position: relative;
-  width: min(220px, 100%);
+  width: min(190px, 100%);
   aspect-ratio: 0.72;
 }
 
@@ -1210,7 +1505,7 @@ textarea {
   display: grid;
   align-content: center;
   justify-items: center;
-  padding: 22px;
+  padding: 20px;
   text-align: center;
   background:
     radial-gradient(circle at top, rgba(212, 176, 118, 0.15), transparent 30%),
@@ -1227,6 +1522,17 @@ textarea {
   border: 1px solid rgba(212, 176, 118, 0.16);
 }
 
+.today-card-front::after {
+  content: "";
+  position: absolute;
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 176, 118, 0.12);
+  box-shadow: 0 0 0 16px rgba(212, 176, 118, 0.03);
+  opacity: 0.9;
+}
+
 .today-card-front span {
   position: relative;
   z-index: 1;
@@ -1239,8 +1545,8 @@ textarea {
 .today-card-front strong {
   position: relative;
   z-index: 1;
-  margin-top: 14px;
-  font-size: 1.9rem;
+  margin-top: 12px;
+  font-size: 1.72rem;
   line-height: 1.15;
 }
 
@@ -1252,19 +1558,19 @@ textarea {
 }
 
 .lucky-time-panel h3 {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .lucky-time-list {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .time-window-card {
   display: grid;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  gap: 8px;
+  padding: 11px 13px;
+  border-radius: 16px;
   border: 1px solid rgba(212, 176, 118, 0.12);
   background:
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.08), transparent 32%),
@@ -1292,7 +1598,7 @@ textarea {
 
 .followup-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   border: 1px solid rgba(212, 176, 118, 0.16);
   background:
     radial-gradient(circle at top right, rgba(212, 176, 118, 0.14), transparent 28%),
@@ -1313,12 +1619,12 @@ textarea {
 .followup-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
 .question-verdict {
   color: var(--gold-soft);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
@@ -1362,6 +1668,32 @@ textarea {
 
   .content-grid {
     grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .empty-state {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "preview"
+      "lore"
+      "notes"
+      "ritual";
+  }
+
+  .empty-state-preview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .empty-state-lore {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .empty-state-illustration {
+    grid-column: 1 / -1;
   }
 
   .ritual-grid {
@@ -1417,7 +1749,7 @@ textarea {
   .form-panel,
   .result-panel,
   .guide-panel {
-    padding: 20px;
+    padding: 18px;
   }
 
   .hero-copy h1 {
@@ -1425,8 +1757,8 @@ textarea {
   }
 
   .hero-visual {
-    min-height: 420px;
-    grid-template-rows: minmax(220px, 1fr) auto;
+    min-height: 400px;
+    grid-template-rows: minmax(210px, 1fr) auto;
   }
 
   .tarot-card {
@@ -1452,7 +1784,7 @@ textarea {
 
   .empty-state {
     min-height: 0;
-    padding: 22px;
+    padding: 18px;
   }
 
   .ask-actions,
@@ -1473,8 +1805,8 @@ textarea {
 
   .date-group,
   .time-group {
-    gap: 8px;
-    padding: 8px;
+    gap: 6px;
+    padding: 6px;
   }
 
   .date-group {
@@ -1488,7 +1820,7 @@ textarea {
   .date-cell,
   .time-cell {
     grid-template-columns: minmax(0, 1fr) 42px;
-    min-height: 58px;
+    min-height: 54px;
   }
 
   .date-cell-year {
